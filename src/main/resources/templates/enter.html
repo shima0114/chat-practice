@@ -1,0 +1,99 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/js/stomp.js}"></script>
+  </head>
+  <body th:with="userInfo = ${user}">
+    <form name="join_room" id="join_room" th:action="@{/talk}" method="post">
+      <div>
+        <span>表示名　　</span>
+        <input type="text" th:value="${userInfo.userName()}" disabled="true"></input>
+      </div>
+      <div style="margin-bottom: 20px;">
+          <span>部屋を選択</span>
+          <select id="room" name="room_id">
+              <option value="">部屋を選ぶ</option>
+              <!--/*/ <th:block th:each="room : ${roomList}"> /*/-->
+              <option th:value="${room.id}" th:text="${room.roomName}" th:attr="data-invalid=${room.invalidateFlag}"></option>
+              <!--/*/ </th:block> /*/-->
+          </select>
+          <input type="button" id="join_room_btn" value="入室" disabled="true"></input>
+          <input type="button" id="restore_room_btn" value="復旧" disabled="true"></input>
+      </div>
+      <div>
+        <span>部屋を作成</span>
+        <input type="text" id="make_room_name" placeholder="作成するルーム名を入力"></input>
+        <input type="button" id="make_room_btn" value="作成"></input>
+      </div>
+      <div class="err_msg" id="create_err_msg"></div>
+      <input type="hidden" name="user_id" id="user_id" th:value="${userInfo.userId()}"></input>
+      <input type="hidden" name="user_name" id="user_name" th:value="${userInfo.userName()}"></input>
+    </form>
+    <th:block th:if="${userInfo.authority().name()}=='ROLE_ADMIN'">
+      <form th:action="@{/admin}" method="post">
+        <input type="submit" value="管理画面へ"></input>
+      </form>
+    </th:block>
+    <form th:action="@{/logout}">
+      <input type="submit" value="ログアウト"></input>
+    </form>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(function() {
+    $("#make_room_btn").on("click", function() {
+        if (valCheck(true)) {
+            $.ajax({
+                type: "GET",
+                url: [[@{'/room/make'}]],
+                data: {roomName:$("#make_room_name").val(),
+                       userId:$("#user_id").val()
+                },
+                success: function(result){
+                    if (result["result"] === "success") {
+                        var optTag = $("<option></option>").val(result["id"]).text(result["name"]).prop("selected", true);
+                        $("#room").append(optTag).change();
+                        var $form = $("#join_room");
+                        $form.append($("<input></input>").hide().attr("name", "room_name").val(result["name"]));
+                        $form.submit();
+                    } else {
+                        $("#create_err_msg").text("同名のルームがすでに存在するため、別の名前を入力してください。");
+                        //alert("同名のルームがすでに存在するため、別の名前を入力してください。");
+                        $("#make_room_name").val("");
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                }
+            });
+        }
+    });
+
+    $("#join_room_btn").on("click", function() {
+        if (valCheck(false)) {
+          var $form = $("#join_room");
+          $form.append($("<input></input>").hide().attr("name", "room_name").val($("#room option:selected").text()));
+          $form.submit();
+        }
+    });
+
+    function valCheck(isCreate) {
+        if (isCreate) {
+            if (!!!$("#make_room_name").val()) {
+                alert("ルーム名を入力してください。");
+                return false;
+            }
+        } else {
+            if (!!!$("#room option:selected").val()) {
+                alert("ルームを選択してください。");
+                return false;
+            }
+        }
+        if (!!!$("#user_name").val()) {
+            alert("名前を入力してください。");
+            return false;
+        }
+        return true;
+    }
+});
+</script>
+</html>

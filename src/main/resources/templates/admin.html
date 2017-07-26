@@ -1,0 +1,17 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/js/stomp.js}"></script>
+  </head>
+  <body>
+    管理画面
+    <form th:action="@{/enter}" method="post">
+      <input type="submit" value="戻る"></input>
+    </form>
+  </body>
+<script type="text/javascript" th:inline="javascript">
+$(function() {
+});
+</script>
+</html>

@@ -1,0 +1,79 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/js/stomp.js}"></script>
+  </head>
+  <body>
+    <!-- ログインが失敗した時のメッセージ -->
+    <div class="alert alert-danger" role="alert"
+      th:if="${session['SPRING_SECURITY_LAST_EXCEPTION']} != null">
+      <strong>ログインに失敗しました: </strong>ユーザが存在しないか、パスワードが間違っています。
+    </div>
+    <form name="login_form" id="login_form" th:action="@{/login}" method="post">
+      <div>
+        <span th:text="${prompt_msg}">ログイン情報を入力</span>
+        <div>ユーザーID<input type="text" name="userId" id="user_id" th:value="${userId}" placeholder="ユーザーIDを入力"></input></div>
+        <div>パスワード<input type="password" name="password" id="user_pass"></input></div>
+        <div><input type="submit" id="logon_btn" value="ログイン"></input></div>
+      </div>
+    </form>
+    <form name="create_user_form" id="create_user_form" th:action="@{/create}" method="post" style="display:none">
+      <div style="margin-bottom: 20px;">
+        <span>新規ユーザー作成</span>
+        <div>ユーザーID<input type="text" name="newUserId" id="new_user_id" placeholder="ユーザーIDを入力"></input></div>
+        <div>表示名　　<input type="text" name="newUserName" id="new_user_name" placeholder="表示名を入力"></input></div>
+        <div>パスワード<input type="password" name="newPassword1" id="new_user_pass_1"></input></div>
+        <div>確認用　　<input type="password" name="newPassword2" id="new_user_pass_2"></input></div>
+        <div class="err_msg" id="err_msg"></div>
+        <div><input type="button" id="create_btn" value="作成"></input></div>
+      </div>
+    </form>
+    <input type="button" id="toggle_mode" value="新規ユーザーを作成" data-mode="create"></input>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(function() {
+    $("#create_btn").on("click", function() {
+        if (!requiredCheck()) {
+            $("#err_msg").text("すべての項目を入力してください。");
+            return false;
+        }
+        var pass1 = $("#new_user_pass_1").val();
+        var pass2 = $("#new_user_pass_2").val();
+        if (pass1 != pass2) {
+            $("#err_msg").text("パスワードが一致していません。");
+            return false;
+        }
+        $("#create_user_form").submit();
+    });
+
+    $("#toggle_mode").on("click", function() {
+        $("#create_user_form").toggle();
+        $("#login_form").toggle();
+        if ($("#toggle_mode").data("mode") === "create") {
+            $("#toggle_mode").val("既存アカウントでログイン");
+            $("#toggle_mode").data("mode", "exists");
+        } else {
+            $("#toggle_mode").val("新規ユーザーを作成");
+            $("#toggle_mode").data("mode", "create");
+        }
+    });
+
+    function requiredCheck() {
+        if (!!!$("#new_user_id").val()) {
+            return false;
+        }
+        if (!!!$("#new_user_name").val()) {
+            return false;
+        }
+        if (!!!$("#new_user_pass_1").val()) {
+            return false;
+        }
+        if (!!!$("#new_user_pass_2").val()) {
+            return false;
+        }
+        return true;
+    }
+});
+</script>
+</html>
