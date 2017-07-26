@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.user;
+package boot.sample.shima.chat.user;
 
 import java.util.ArrayList;
 import java.util.Collection;

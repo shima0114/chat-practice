@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.controller;
+package boot.sample.shima.chat.controller;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.messaging.handler.annotation.DestinationVariable;
@@ -9,9 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jp.co.commerce.sample.shima.chat.history.HistoryService;
-import jp.co.commerce.sample.shima.chat.room.ChatRoom;
-import jp.co.commerce.sample.shima.chat.room.ChatRoomService;
+import boot.sample.shima.chat.history.HistoryService;
+import boot.sample.shima.chat.room.ChatRoom;
+import boot.sample.shima.chat.room.ChatRoomService;
 
 @Controller
 public class BaseController {

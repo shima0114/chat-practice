@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.task;
+package boot.sample.shima.chat.task;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;

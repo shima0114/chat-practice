@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.config;
+package boot.sample.shima.chat.config;
 
 import org.springframework.context.annotation.Configuration;
 import org.springframework.messaging.simp.config.MessageBrokerRegistry;

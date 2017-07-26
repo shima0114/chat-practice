@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.controller;
+package boot.sample.shima.chat.controller;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -9,8 +9,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import jp.co.commerce.sample.shima.chat.room.ChatRoom;
-import jp.co.commerce.sample.shima.chat.room.ChatRoomService;
+import boot.sample.shima.chat.room.ChatRoom;
+import boot.sample.shima.chat.room.ChatRoomService;
 
 @RestController
 public class RoomController {

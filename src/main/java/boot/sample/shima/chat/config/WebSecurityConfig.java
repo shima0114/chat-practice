@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.config;
+package boot.sample.shima.chat.config;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.security.SecurityProperties;
@@ -11,8 +11,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import jp.co.commerce.sample.shima.chat.user.ChatUser;
-import jp.co.commerce.sample.shima.chat.user.ChatUserService;
+import boot.sample.shima.chat.user.ChatUser;
+import boot.sample.shima.chat.user.ChatUserService;
 
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)

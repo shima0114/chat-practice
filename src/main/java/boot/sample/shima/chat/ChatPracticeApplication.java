@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat;
+package boot.sample.shima.chat;
 
 import java.util.concurrent.Executor;
 
@@ -10,9 +10,9 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
-import jp.co.commerce.sample.shima.chat.history.HistoryService;
-import jp.co.commerce.sample.shima.chat.room.ChatRoomService;
-import jp.co.commerce.sample.shima.chat.user.ChatUserService;
+import boot.sample.shima.chat.history.HistoryService;
+import boot.sample.shima.chat.room.ChatRoomService;
+import boot.sample.shima.chat.user.ChatUserService;
 
 @SpringBootApplication
 @EnableScheduling

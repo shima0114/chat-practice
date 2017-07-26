@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.controller;
+package boot.sample.shima.chat.controller;
 
 import java.security.Principal;
 
@@ -9,9 +9,9 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import jp.co.commerce.sample.shima.chat.room.ChatRoomService;
-import jp.co.commerce.sample.shima.chat.user.ChatUser;
-import jp.co.commerce.sample.shima.chat.user.ChatUserService;
+import boot.sample.shima.chat.room.ChatRoomService;
+import boot.sample.shima.chat.user.ChatUser;
+import boot.sample.shima.chat.user.ChatUserService;
 
 @Controller
 public class UserController {

@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.user;
+package boot.sample.shima.chat.user;
 
 import java.util.Optional;
 
@@ -7,7 +7,7 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import jp.co.commerce.sample.shima.chat.user.ChatUser.Authority;
+import boot.sample.shima.chat.user.ChatUser.Authority;
 
 public class ChatUserService implements UserDetailsService {
 

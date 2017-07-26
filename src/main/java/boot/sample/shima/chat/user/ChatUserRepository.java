@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.user;
+package boot.sample.shima.chat.user;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

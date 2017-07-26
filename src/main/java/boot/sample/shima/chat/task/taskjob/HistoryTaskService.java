@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.task.taskjob;
+package boot.sample.shima.chat.task.taskjob;
 
 import java.util.List;
 
@@ -7,9 +7,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
-import jp.co.commerce.sample.shima.chat.history.HistoryService;
-import jp.co.commerce.sample.shima.chat.room.ChatRoom;
-import jp.co.commerce.sample.shima.chat.room.ChatRoomService;
+import boot.sample.shima.chat.history.HistoryService;
+import boot.sample.shima.chat.room.ChatRoom;
+import boot.sample.shima.chat.room.ChatRoomService;
 
 @Component
 public class HistoryTaskService {

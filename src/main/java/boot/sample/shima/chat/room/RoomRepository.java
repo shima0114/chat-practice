@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.room;
+package boot.sample.shima.chat.room;
 
 import java.util.List;
 

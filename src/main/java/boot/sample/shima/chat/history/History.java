@@ -1,4 +1,4 @@
-package jp.co.commerce.sample.shima.chat.history;
+package boot.sample.shima.chat.history;
 
 import java.sql.Timestamp;
 
