@@ -1,4 +1,4 @@
-package jp.co.commerce.shima;
+package boot.sample.shima.chat;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
