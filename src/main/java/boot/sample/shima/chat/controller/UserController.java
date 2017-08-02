@@ -38,7 +38,7 @@ public class UserController {
         try {
             user = (ChatUser)auth.getPrincipal();
         } catch (ClassCastException e) {
-            user = new ChatUser("admin", "admin", "admin", ChatUser.Authority.ROLE_ADMIN);
+            user = new ChatUser("admin", "admin", "admin", ChatUser.Authority.ROLE_ADMIN, true);
         }
         model.addAttribute("user", user);
         model.addAttribute("roomList", rooms.getAvailableRooms(user.getUserId()));

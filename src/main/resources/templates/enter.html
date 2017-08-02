@@ -3,44 +3,89 @@
     <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
     <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
     <script th:src="@{/js/stomp.js}"></script>
+    <script th:src="@{/js/chat-context.js}"></script>
   </head>
   <body th:with="userInfo = ${user}">
     <form name="join_room" id="join_room" th:action="@{/talk}" method="post">
+    <!-- header area -->
+    <div class="header_area">
       <div>
-        <span>表示名　　</span>
-        <input type="text" th:value="${userInfo.userName()}" disabled="true"></input>
+        ようこそ&nbsp;<span th:text="${userInfo.userName()}"></span>&nbsp;さん
+        <input type="button" id="logout_btn" value="ログアウト"></input>
       </div>
-      <div style="margin-bottom: 20px;">
-          <span>部屋を選択</span>
-          <select id="room" name="room_id">
-              <option value="">部屋を選ぶ</option>
-              <!--/*/ <th:block th:each="room : ${roomList}"> /*/-->
-              <option th:value="${room.id}" th:text="${room.roomName}" th:attr="data-invalid=${room.invalidateFlag}"></option>
+    </div>
+    <!-- /header area -->
+    <!-- Room list area(left area) -->
+      <div class="room_select_area">
+        <span>Room List</span><div class="pos_right"><span>リスト更新</span>
+        <select id="update_interval">
+          <option value="0">なし</option>
+          <option value="1">1秒</option>
+          <option value="3">3秒</option>
+          <option value="5" selected="true">5秒</option>
+          <option value="10">10秒</option>
+        </select>
+        </div>
+        <div>
+          <select id="room" name="room_id" size="5">
+              <!--/*/ <th:block th:each="rooms : ${roomList}"> /*/-->
+              <!--/*/ <th:block th:with="room = ${rooms.getRoom()}, state = ${rooms.getState()}"> /*/-->
+              <option th:value="${room.id}" th:id="|room_${room.id}|" th:text="|${room.roomName}（${state}）|"
+                  th:attr="data-invalid=${room.invalidateFlag},data-owner-id=${room.createUserId}"></option>
+              <!--/*/ </th:block> /*/-->
               <!--/*/ </th:block> /*/-->
           </select>
+        </div>
+        <div class="pos_right">
           <input type="button" id="join_room_btn" value="入室" disabled="true"></input>
           <input type="button" id="restore_room_btn" value="復旧" disabled="true"></input>
+          <input type="button" id="close_room_btn" value="閉鎖" disabled="true"></input>
+        </div>
       </div>
+    <!-- /Room list area(left area) -->
+    <!-- Main area -->
+    <div class="room_create_area">
       <div>
         <span>部屋を作成</span>
-        <input type="text" id="make_room_name" placeholder="作成するルーム名を入力"></input>
-        <input type="button" id="make_room_btn" value="作成"></input>
+        <div>
+          <input type="text" id="make_room_name" placeholder="作成するルーム名を入力"></input>
+          <input type="button" id="make_room_btn" value="作成"></input>
+        </div>
       </div>
-      <div class="err_msg" id="create_err_msg"></div>
       <input type="hidden" name="user_id" id="user_id" th:value="${userInfo.userId()}"></input>
       <input type="hidden" name="user_name" id="user_name" th:value="${userInfo.userName()}"></input>
+    </div>
+    <div class="err_msg" id="create_err_msg"></div>
+    <!-- /Main area -->
+    <!-- /Footer area -->
+      <div class="footer_area">
+      </div>
+    <!-- /Footer area -->
     </form>
     <th:block th:if="${userInfo.authority().name()}=='ROLE_ADMIN'">
       <form th:action="@{/admin}" method="post">
         <input type="submit" value="管理画面へ"></input>
       </form>
     </th:block>
-    <form th:action="@{/logout}">
-      <input type="submit" value="ログアウト"></input>
+    <form id="logout_form" th:action="@{/logout}" method="post">
     </form>
 </body>
 <script type="text/javascript" th:inline="javascript">
 $(function() {
+
+    $("#room").on("change", function () {
+        var $selOpt = $("#room option:selected");
+        var state = $selOpt.attr("data-invalid").toLowerCase() === "true";
+        $("#join_room_btn").attr("disabled", !!state);
+        $("#restore_room_btn").attr("disabled", !state);
+        var createUserId = $selOpt.attr("data-owner-id");
+        if (createUserId === $("#user_id").val()) {
+            $("#close_room_btn").attr("disabled", !!state);
+        } else {
+            $("#close_room_btn").attr("disabled", true);
+        }
+    });
+
     $("#make_room_btn").on("click", function() {
         if (valCheck(true)) {
             $.ajax({
@@ -51,14 +96,17 @@ $(function() {
                 },
                 success: function(result){
                     if (result["result"] === "success") {
-                        var optTag = $("<option></option>").val(result["id"]).text(result["name"]).prop("selected", true);
+                        var optTag = $("<option></option>").attr("data-invalid", result["invalidateFlag"])
+                                        .attr("data-owner-id", result["createUserId"])
+                                        .val(result["id"])
+                                        .attr("id", "room_" + result["id"])
+                                        .text(result["name"] + "（" + result["state"] + "）").prop("selected", true);
                         $("#room").append(optTag).change();
                         var $form = $("#join_room");
                         $form.append($("<input></input>").hide().attr("name", "room_name").val(result["name"]));
                         $form.submit();
                     } else {
                         $("#create_err_msg").text("同名のルームがすでに存在するため、別の名前を入力してください。");
-                        //alert("同名のルームがすでに存在するため、別の名前を入力してください。");
                         $("#make_room_name").val("");
                     }
                 },
@@ -75,6 +123,55 @@ $(function() {
           $form.submit();
         }
     });
+
+    $("#restore_room_btn").on("click", function() {
+          $.ajax({
+              type: "GET",
+              url: [[@{'/room/restore'}]],
+              data: {roomId:$("#room option:selected").val()},
+              success: function(result){
+                  if (result["result"] === "success") {
+                      $("#room option:selected").attr("data-invalid", "false").change();
+                  } else {
+                      $("#create_err_msg").text("ルームの復旧に失敗しました。");
+                      $("#make_room_name").val("");
+                  }
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown){
+              }
+          });
+    });
+
+
+    $("#close_room_btn").on("click", function() {
+        var roomId = $("#room option:selected").val();
+        var chatContext = new ChatContext('ws://' + location.host + '/chat', '/topic/room/');
+        chatContext.connect(roomId);
+        $.ajax({
+            type: "GET",
+            url: [[@{'/room/delete'}]],
+            data: {roomId:roomId},
+            success: function(result){
+                if (result["result"] === "success") {
+                    // 閉鎖メッセージを送信
+                    var msg = {};
+                    msg.message ="ルームが作成者により閉鎖されました。";
+                    msg.user_name = "system";
+                    msg.proc = "force_close";
+                    chatContext.sendMessage(msg);
+                    chatContext.close();
+                } else {
+                    alert("削除に失敗しました。");
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
+    });
+
+    $("#logout_btn").on("click", function() {
+        $("#logout_form").submit();
+    })
 
     function valCheck(isCreate) {
         if (isCreate) {
@@ -95,5 +192,61 @@ $(function() {
         return true;
     }
 });
+</script>
+<script type="text/javascript" th:inline="javascript">
+//<![CDATA[
+$(function() {
+    var timerId = null;
+    var lastInterval = "0";
+    var doListUpdate = function() {
+        $.ajax({
+            type: "GET",
+            url: [[@{'/room/listupdate'}]],
+            data: {userId:$("#user_id").val()},
+            success: function(result){
+                result.forEach(function(rooms){
+                    var state = rooms.state;
+                    var room = rooms.room;
+                    if (!!($("#room_" + room.id).val())) {
+                        $("#room_" + room.id).text(room.roomName + "（" + state + "）").attr("data-invalid",room.invalidateFlag);
+                    } else {
+                        // option 追加
+                        var parent = $("#room");
+                        var optTag = $("<option></option>").attr("data-invalid",room.invalidateFlag)
+                                        .attr("data-owner-id", room.createUserId)
+                                        .val(room.id)
+                                        .attr("id", "room_" + room.id)
+                                        .text(room.roomName + "（" + state + "）");
+                        parent.append(optTag);
+                    }
+                })
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
+        console.log("doListUpdate");
+        timerId = setTimeout(doListUpdate, lastInterval * 1000);
+    }
+
+    var intervalChange = function() {
+        var selInterval = $("#update_interval option:selected").val();
+        if (!!timerId
+                && (lastInterval !== selInterval)) {
+            console.log("clear setTimeout");
+            clearTimeout(timerId);
+        }
+        lastInterval = selInterval;
+        if (selInterval == "0") {
+            return;
+        }
+        doListUpdate();
+    }
+
+    $("#update_interval").on("change", function() {
+        intervalChange();
+    });
+    intervalChange();
+});
+//]]>
 </script>
 </html>

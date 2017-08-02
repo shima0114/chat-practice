@@ -16,7 +16,7 @@ public class TaskInterceptor {
     @Value("${batch.name.host}")
     String batchHostName;
 
-    @Around("execution(* jp.co.commerce.sample.shima.chat.task.taskjob..*.*(..)) && @annotation(org.springframework.scheduling.annotation.Scheduled)")
+    @Around("execution(* boot.sample.shima.chat.task.taskjob..*.*(..)) && @annotation(org.springframework.scheduling.annotation.Scheduled)")
     public Object around(ProceedingJoinPoint pjp) throws Throwable {
         if (!allowedExecuteHost()) {
             System.out.println(String.format("host is not allowed execute. [localhost=%s, batchhost=%s]", getHostName(), batchHostName));

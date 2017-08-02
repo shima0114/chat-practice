@@ -38,9 +38,11 @@ public class BaseController {
             model.addAttribute("roomList", rooms.getAllRoom());
             return "index";
         }
+        rooms.joinRoom(room_id, user_id);
         ChatRoom room = rooms.getRoomFromId(room_id);
         model.addAttribute("room_id", room.getId());
         model.addAttribute("user_name", user_name);
+        model.addAttribute("user_id", user_id);
         model.addAttribute("room_name", room.getRoomName());
         model.addAttribute("del_auth", user_id.equals(room.getCreateUserId()));
         model.addAttribute("histories", histories.getHistories(room_id));
@@ -53,13 +55,8 @@ public class BaseController {
     }
 
     @MessageMapping("/room/{id}")
-    public String sendMessage(@DestinationVariable String id, @RequestParam String message, @RequestParam String room_id, @RequestParam String user_name) {
-        createHistory(room_id, user_name, message);
+    public String sendMessage(@DestinationVariable String id, @RequestParam String message) {
         smt.convertAndSend("/topic/room/" + id, message);
         return message;
-    }
-
-    public void createHistory(String roomId, String userName, String message) {
-        histories.registMessageHistory(roomId, userName, message);
     }
 }

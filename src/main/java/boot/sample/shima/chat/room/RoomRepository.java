@@ -11,6 +11,8 @@ public interface RoomRepository extends JpaRepository<ChatRoom, String> {
 
     public ChatRoom findByIdAndInvalidateFlagFalse(String id);
 
+    public ChatRoom findById(String id);
+
     public List<ChatRoom> findByInvalidateFlagFalse();
 
     public List<ChatRoom> findByInvalidateFlagFalseOrCreateUserId(String createUserId);

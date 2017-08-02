@@ -40,3 +40,53 @@
 .err_msg {
   color:red;
 }
+
+
+* html body{
+overflow: auto;
+}
+
+select#room {
+  width: 100%;
+}
+
+.pos_right {
+  margin-right: 5px;
+  float: right;
+}
+
+div.header_area {
+margin: 0;
+padding: 0px 0px 0px 0px ;
+}
+
+div.main_area {
+margin-top: 00;
+padding: 0px 0px 0px 150px ;
+}
+
+div.room_select_area {
+position: fixed !important;
+position: absolute;
+top: 40px;
+left: 10px;
+width: 350px;
+height: 180px;
+/*background-color : #aaff66 ;*/
+overflow: auto;
+}
+
+div.room_create_area {
+position: fixed !important;
+position: absolute;
+top: 200px;
+left: 10px;
+width: 350px;
+height: 50px;
+/*background-color : #aaff66 ;*/
+overflow: auto;
+}
+
+div.footer_area {
+  padding: 200px 0px 0px 0px ;
+}

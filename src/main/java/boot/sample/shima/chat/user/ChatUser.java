@@ -38,13 +38,17 @@ public class ChatUser implements UserDetails {
     @Enumerated(EnumType.STRING)
     private Authority authority;
 
+    @Column(columnDefinition="boolean default true")
+    private boolean isEnabled;
+
     protected ChatUser() {}
 
-    public ChatUser(String userId, String userName, String password, Authority auth) {
+    public ChatUser(String userId, String userName, String password, Authority auth, boolean isEnabled) {
         this.userId = userId;
         this.userName = userName;
         this.password = password;
         this.authority = auth;
+        this.isEnabled = isEnabled;
     }
 
     public String userName() {
@@ -83,7 +87,7 @@ public class ChatUser implements UserDetails {
 
     @Override
     public boolean isEnabled() {
-      return true;
+      return isEnabled;
     }
 
     @Override
