@@ -46,7 +46,7 @@
 overflow: auto;
 }
 
-select#room {
+select#channel {
   width: 100%;
 }
 
@@ -65,7 +65,7 @@ margin-top: 00;
 padding: 0px 0px 0px 150px ;
 }
 
-div.room_select_area {
+div.channel_select_area {
 position: fixed !important;
 position: absolute;
 top: 40px;
@@ -76,7 +76,7 @@ height: 180px;
 overflow: auto;
 }
 
-div.room_create_area {
+div.channel_create_area {
 position: fixed !important;
 position: absolute;
 top: 200px;

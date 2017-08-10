@@ -10,8 +10,8 @@ import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
 
+import boot.sample.shima.chat.channel.ChannelService;
 import boot.sample.shima.chat.history.HistoryService;
-import boot.sample.shima.chat.room.ChatRoomService;
 import boot.sample.shima.chat.user.ChatUserService;
 
 @SpringBootApplication
@@ -19,8 +19,8 @@ import boot.sample.shima.chat.user.ChatUserService;
 public class ChatPracticeApplication implements SchedulingConfigurer {
 
     @Bean
-    public ChatRoomService rooms() {
-        return new ChatRoomService();
+    public ChannelService rooms() {
+        return new ChannelService();
     }
 
     @Bean

@@ -1,0 +1,206 @@
+<html xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
+    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+  </head>
+  <body>
+    <form name="msg_form" th:action="@{/talk}">
+      <input type="hidden" id="user_name" th:value="${user_name}"></input>
+      <input type="hidden" id="channel_name" th:value="${channel_name}"></input>
+      <input type="hidden" id="channel_id" th:value="${channel_id}"></input>
+      <div class="receive_area" id="messages" style="margin-top: 10px;">
+        <!--/*/ <th:block th:each="hst : ${histories}"> /*/-->
+          <div th:text="${hst.getMessage()}" th:class="${hst.getUserName() == user_name ? 'send' : 'receive'}"></div>
+          <div th:text="${hst.getUserName()}" th:class="${hst.getUserName() == user_name ? 'send_name clear_float' : 'receive_name clear_float'}"></div>
+        <!--/*/ </th:block> /*/-->
+      </div>
+      <div>
+          <div id="status_msg" style="color: #f00">未接続</div>
+      </div>
+      <input type="text" id="message" placeholder="入力してください。"></input>
+      <input type="button" id="send_message" value="送信"></input>
+      <input th:if="${del_auth}" type="button" id="delete_channel_btn" value="閉鎖"></input>
+      <input type="hidden" id="status" value=""></input>
+    </form>
+    <form id="leave_form" th:action="@{/enter}" method="post">
+        <input type="hidden" name="userId" id="user_id" th:value="${user_id}"></input>
+        <input type="button" id="leave_channel" value="チャンネル移動"></input>
+    </form>
+    <form id="withdrawal_form" th:action="@{/channel/withdrawal}" method="post">
+        <input type="hidden" name="userId" th:value="${user_id}"></input>
+        <input type="hidden" name="channelId" th:value="${channel_id}"></input>
+        <input type="button" id="withdrawal_channel" value="チャンネル脱退"></input>
+    </form>
+</body>
+<script type="text/javascript" th:inline="javascript">
+$(function() {
+    var endpoint = 'ws://' + location.host + '/endpoint';
+    var webSocket = null;
+
+    var connect = function() {
+        webSocket = new WebSocket(endpoint + '?' + encodeURIComponent($('#channel_id').val()));
+        webSocket.onopen = function() {
+            var channelName = $("#channel_name").val();
+            $("#status_msg").html(channelName + "に接続中");
+        };
+        webSocket.onclose = function() {
+        };
+        webSocket.onmessage = function(message) {
+            var retMsg = JSON.parse(message.data);
+            if (retMsg.user_name === "system") {
+                var msgBodyTag = $("<div></div>").text(retMsg.message);
+                $("#messages").append(msgBodyTag);
+                if (retMsg.proc == "force_close") {
+                    var closeWait = 5;
+                    var closeMsgTag = $("<div></div>").attr("id", "countdown_msg").text("5秒後に自動で退室します。");
+                    $("#messages").append(closeMsgTag);
+                    var countDown = function() {
+                        closeWait--;
+                        $("#countdown_msg").text(closeWait + "秒後に自動で退室します。");
+                    }
+                    setInterval(countDown, 1000);
+                    var leavePage = function() {
+                        location.href = "/enter";
+                    }
+                    setTimeout(leavePage, 5000);
+                    webSocket.close();
+                }
+            } else {
+                var msgBodyTag = $("<div></div>").text(retMsg.message);
+                var msgSenderTag = $("<div></div>").text(retMsg.user_name);
+                var msgTag = $("<p></p>").addClass("clear_float");
+                if (retMsg.user_id === $("#user_id").val()) {
+                    msgBodyTag.addClass("send");
+                    msgSenderTag.addClass("send_name clear_float");
+                } else {
+                    msgBodyTag.addClass("receive");
+                    msgSenderTag.addClass("receive_name clear_float");
+                }
+                $("#messages").append(msgTag.append(msgBodyTag).append(msgSenderTag));
+            }
+            msgScroll();
+        };
+        webSocket.onerror = function() {
+            alert('エラーが発生しました。');
+        };
+    };
+
+    // メッセージ送信共通
+    var sendMessage = function(message, userId, userName, process) {
+        if (!!!message) {
+            return false;
+        }
+        var msg = {};
+        msg.message = message;
+        msg.user_id = userId;
+        msg.user_name = userName;
+        if (!!process) {
+            msg.proc = process;
+        }
+        webSocket.send(JSON.stringify(msg));
+    }
+
+    var conClose = function() {
+        if (!!webSocket) {
+            webSocket.close();
+            webSocket = null;
+        }
+    }
+
+    // 離席
+    $('#leave_channel').on("click", function() {
+        sendLeaveMessage();
+        conClose();
+        $("#leave_form").submit();
+    });
+
+    // 脱退
+    $("#withdrawal_channel").on("click", function(){
+          $.ajax({
+              type: "GET",
+              url: $("#withdrawal_form").attr("action"),
+              data: {
+                    channelId:$("#channel_id").val(),
+                    userId: $("#user_id").val()
+              },
+              success: function(result){
+                  if (!!webSocket) {
+                      sendWithdrawalMessage();
+                      conClose();
+                  }
+                  $("#leave_form").submit();
+              },
+              error: function(XMLHttpRequest, textStatus, errorThrown){
+              }
+          });
+          return false;
+    });
+
+    // 閉鎖
+    $("#delete_channel_btn").on("click", function() {
+        $("#delete_channel_btn").attr("disabled", true);
+        $.ajax({
+            type: "GET",
+            url: [[@{'/channel/delete'}]],
+            data: {channelId:$("#channel_id").val()},
+            success: function(result){
+                if (result["result"] === "success") {
+                    // 閉鎖メッセージを送信
+                    sendCloseMessage();
+                } else {
+                    alert("閉鎖に失敗しました。");
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
+    });
+
+    // 送信
+    $('#send_message').click(function() {
+        sendNormalMessage();
+    });
+
+    // enter押下
+    $(document).keypress(function(e) {
+        if (e.which === 13) {
+            sendNormalMessage();
+            return false;
+        }
+    });
+
+    function sendNormalMessage() {
+        if (!webSocket) {
+            alert('未接続です。');
+            return;
+        }
+        sendMessage($("#message").val(), $("#user_id").val(), $("#user_name").val());
+        $("#message").val("");
+    }
+
+    function sendWithdrawalMessage() {
+        sendMessage($("#user_name").val() + "が脱退しました。", "system", "system");
+    }
+
+    function sendLeaveMessage() {
+        sendMessage($("#user_name").val() + "が退席しました。", "system", "system");
+    }
+
+    function sendCloseMessage() {
+        sendMessage("チャンネルが作成者により閉鎖されました。", "system", "system", "force_close");
+    }
+
+    function msgScroll() {
+        var psconsole = $('#messages');
+        if (!!psconsole) {
+            psconsole.scrollTop(
+                    psconsole[0].scrollHeight - psconsole.height()
+                );
+        }
+    }
+
+    connect();
+    msgScroll();
+});
+</script>
+</html>

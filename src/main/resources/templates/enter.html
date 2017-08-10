@@ -6,7 +6,7 @@
     <script th:src="@{/js/chat-context.js}"></script>
   </head>
   <body th:with="userInfo = ${user}">
-    <form name="join_room" id="join_room" th:action="@{/talk}" method="post">
+    <form name="join_channel" id="join_channel" th:action="@{/talk}" method="post">
     <!-- header area -->
     <div class="header_area">
       <div>
@@ -15,41 +15,47 @@
       </div>
     </div>
     <!-- /header area -->
-    <!-- Room list area(left area) -->
-      <div class="room_select_area">
-        <span>Room List</span><div class="pos_right"><span>リスト更新</span>
+    <!-- channel list area(left area) -->
+      <div class="channel_select_area">
+        <span>Channel List</span><div class="pos_right"><span>リスト更新</span>
         <select id="update_interval">
           <option value="0">なし</option>
-          <option value="1">1秒</option>
           <option value="3">3秒</option>
-          <option value="5" selected="true">5秒</option>
+          <option value="5">5秒</option>
           <option value="10">10秒</option>
+          <option value="30" selected="true">30秒</option>
+          <option value="60">60秒</option>
         </select>
         </div>
         <div>
-          <select id="room" name="room_id" size="5">
-              <!--/*/ <th:block th:each="rooms : ${roomList}"> /*/-->
-              <!--/*/ <th:block th:with="room = ${rooms.getRoom()}, state = ${rooms.getState()}"> /*/-->
-              <option th:value="${room.id}" th:id="|room_${room.id}|" th:text="|${room.roomName}（${state}）|"
-                  th:attr="data-invalid=${room.invalidateFlag},data-owner-id=${room.createUserId}"></option>
+          <select id="channel" name="channel_id" size="5">
+              <!--/*/ <th:block th:each="channels : ${channelList}"> /*/-->
+              <!--/*/ <th:block th:with="channel = ${channels.getChannel()},
+                            state = ${channels.getState()},
+                            stateStr = ${channels.getState() == 'JOINING' ? '参加中' : '未参加'},
+                            condition = ${channels.getCondition()}"> /*/-->
+              <option th:value="${channel.id}" th:id="|channel_${channel.id}|" th:text="|${channel.channelName}（${stateStr}）（${condition}）|"
+                  th:attr="data-invalid=${channel.invalidateFlag},data-owner-id=${channel.createUserId},data-state=${state}"></option>
               <!--/*/ </th:block> /*/-->
               <!--/*/ </th:block> /*/-->
           </select>
         </div>
         <div class="pos_right">
-          <input type="button" id="join_room_btn" value="入室" disabled="true"></input>
-          <input type="button" id="restore_room_btn" value="復旧" disabled="true"></input>
-          <input type="button" id="close_room_btn" value="閉鎖" disabled="true"></input>
+          <input type="button" id="join_channel_btn" value="参加" disabled="true"></input>
+          <input type="button" id="leave_channel_btn" value="脱退" disabled="true"></input>
+          <input type="button" id="restore_channel_btn" value="復旧" disabled="true" style="display:none"></input>
+          <input type="button" id="close_channel_btn" value="閉鎖" disabled="true" style="display:none"></input>
+          <input type="button" id="join_channel_btn_2" value="参加(without stomp)"></input>
         </div>
       </div>
-    <!-- /Room list area(left area) -->
+    <!-- /channel list area(left area) -->
     <!-- Main area -->
-    <div class="room_create_area">
+    <div class="channel_create_area">
       <div>
         <span>部屋を作成</span>
         <div>
-          <input type="text" id="make_room_name" placeholder="作成するルーム名を入力"></input>
-          <input type="button" id="make_room_btn" value="作成"></input>
+          <input type="text" id="make_channel_name" placeholder="作成するチャンネル名を入力"></input>
+          <input type="button" id="make_channel_btn" value="作成"></input>
         </div>
       </div>
       <input type="hidden" name="user_id" id="user_id" th:value="${userInfo.userId()}"></input>
@@ -71,70 +77,81 @@
     </form>
 </body>
 <script type="text/javascript" th:inline="javascript">
+//<![CDATA[
 $(function() {
 
-    $("#room").on("change", function () {
-        var $selOpt = $("#room option:selected");
-        var state = $selOpt.attr("data-invalid").toLowerCase() === "true";
-        $("#join_room_btn").attr("disabled", !!state);
-        $("#restore_room_btn").attr("disabled", !state);
-        var createUserId = $selOpt.attr("data-owner-id");
-        if (createUserId === $("#user_id").val()) {
-            $("#close_room_btn").attr("disabled", !!state);
+    /* Logout */
+    $("#logout_btn").on("click", function() {
+        $("#logout_form").submit();
+    });
+
+    /* Select List */
+    $("#channel").on("change", function () {
+        var $selOpt = $("#channel option:selected");
+        var invalid = $selOpt.attr("data-invalid").toLowerCase() === "true";
+        var isOwner = $selOpt.attr("data-owner-id") === $("#user_id").val();
+
+        $("#join_channel_btn").attr("disabled", !!invalid);
+        $("#restore_channel_btn").toggle(!!invalid && isOwner).attr("disabled", !invalid);;
+        $("#close_channel_btn").toggle(!invalid && isOwner).attr("disabled", !!invalid);
+
+        var state = $selOpt.attr("data-state").toUpperCase() === "JOINING";
+        if (state) {
+            $("#join_channel_btn").val("表示");
         } else {
-            $("#close_room_btn").attr("disabled", true);
+            $("#join_channel_btn").val("参加");
         }
+        $("#leave_channel_btn").attr("disabled", !state);
     });
 
-    $("#make_room_btn").on("click", function() {
-        if (valCheck(true)) {
-            $.ajax({
-                type: "GET",
-                url: [[@{'/room/make'}]],
-                data: {roomName:$("#make_room_name").val(),
-                       userId:$("#user_id").val()
-                },
-                success: function(result){
-                    if (result["result"] === "success") {
-                        var optTag = $("<option></option>").attr("data-invalid", result["invalidateFlag"])
-                                        .attr("data-owner-id", result["createUserId"])
-                                        .val(result["id"])
-                                        .attr("id", "room_" + result["id"])
-                                        .text(result["name"] + "（" + result["state"] + "）").prop("selected", true);
-                        $("#room").append(optTag).change();
-                        var $form = $("#join_room");
-                        $form.append($("<input></input>").hide().attr("name", "room_name").val(result["name"]));
-                        $form.submit();
-                    } else {
-                        $("#create_err_msg").text("同名のルームがすでに存在するため、別の名前を入力してください。");
-                        $("#make_room_name").val("");
-                    }
-                },
-                error: function(XMLHttpRequest, textStatus, errorThrown){
-                }
-            });
-        }
-    });
-
-    $("#join_room_btn").on("click", function() {
+    /* Join Channel */
+    $("#join_channel_btn").on("click", function() {
         if (valCheck(false)) {
-          var $form = $("#join_room");
-          $form.append($("<input></input>").hide().attr("name", "room_name").val($("#room option:selected").text()));
+          var $form = $("#join_channel");
+          $form.append($("<input></input>").hide().attr("name", "channel_name").val($("#channel option:selected").text()));
           $form.submit();
         }
     });
 
-    $("#restore_room_btn").on("click", function() {
+    /* Join Channel without stomp */
+    $("#join_channel_btn_2").on("click", function() {
+        if (valCheck(false)) {
+          var $form = $("#join_channel").attr("action", "/talk2");
+          $form.append($("<input></input>").hide().attr("name", "channel_name").val($("#channel option:selected").text()));
+          $form.submit();
+        }
+    });
+
+    /* Withdrawal Channel */
+    $("#leave_channel_btn").on("click", function() {
+        $.ajax({
+            type: "GET",
+            url: /*[[@{'/channel/withdrawal'}]]*/,
+            data: {
+                  channelId:$("#channel option:selected").val(),
+                  userId: $("#user_id").val()
+            },
+            success: function(result){
+                listUpdate();
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
+    });
+
+    /* Restore closed Channel */
+    $("#restore_channel_btn").on("click", function() {
           $.ajax({
               type: "GET",
-              url: [[@{'/room/restore'}]],
-              data: {roomId:$("#room option:selected").val()},
+              url: /*[[@{'/channel/restore'}]]*/,
+              data: {channelId:$("#channel option:selected").val()},
               success: function(result){
                   if (result["result"] === "success") {
-                      $("#room option:selected").attr("data-invalid", "false").change();
+                      $("#channel option:selected").attr("data-invalid", "false").change();
+                      listUpdate();
                   } else {
-                      $("#create_err_msg").text("ルームの復旧に失敗しました。");
-                      $("#make_room_name").val("");
+                      $("#create_err_msg").text("チャンネルの復旧に失敗しました。");
+                      $("#make_channel_name").val("");
                   }
               },
               error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -142,24 +159,27 @@ $(function() {
           });
     });
 
-
-    $("#close_room_btn").on("click", function() {
-        var roomId = $("#room option:selected").val();
-        var chatContext = new ChatContext('ws://' + location.host + '/chat', '/topic/room/');
-        chatContext.connect(roomId);
+    /* Closing Channel */
+    $("#close_channel_btn").on("click", function() {
+        var channelId = $("#channel option:selected").val();
         $.ajax({
             type: "GET",
-            url: [[@{'/room/delete'}]],
-            data: {roomId:roomId},
+            url: /*[[@{'/channel/delete'}]]*/,
+            data: {channelId:channelId},
             success: function(result){
                 if (result["result"] === "success") {
-                    // 閉鎖メッセージを送信
+                    // Connect target channel
+                    var chatContext = new ChatContext('ws://' + location.host + '/chat', '/topic/channel/');
+                    chatContext.connect(channelId);
+                    // Send closed message
                     var msg = {};
-                    msg.message ="ルームが作成者により閉鎖されました。";
+                    msg.message ="チャンネルが作成者により閉鎖されました。";
                     msg.user_name = "system";
                     msg.proc = "force_close";
                     chatContext.sendMessage(msg);
+                    // Disconnect
                     chatContext.close();
+                    listUpdate();
                 } else {
                     alert("削除に失敗しました。");
                 }
@@ -169,19 +189,41 @@ $(function() {
         });
     });
 
-    $("#logout_btn").on("click", function() {
-        $("#logout_form").submit();
-    })
+    /* Create new Channel */
+    $("#make_channel_btn").on("click", function() {
+        if (valCheck(true)) {
+            $.ajax({
+                type: "GET",
+                url: /*[[@{'/channel/make'}]]*/,
+                data: {channelName:$("#make_channel_name").val(),
+                       userId:$("#user_id").val()
+                },
+                success: function(result){
+                    if (result["result"] === "success") {
+                        listUpdate();
+                        var $form = $("#join_channel");
+                        $form.append($("<input></input>").hide().attr("name", "channel_name").val(result["name"]));
+                        $form.submit();
+                    } else {
+                        $("#create_err_msg").text("同名のチャンネルがすでに存在するため、別の名前を入力してください。");
+                        $("#make_channel_name").val("");
+                    }
+                },
+                error: function(XMLHttpRequest, textStatus, errorThrown){
+                }
+            });
+        }
+    });
 
     function valCheck(isCreate) {
         if (isCreate) {
-            if (!!!$("#make_room_name").val()) {
-                alert("ルーム名を入力してください。");
+            if (!!!$("#make_channel_name").val()) {
+                alert("チャンネル名を入力してください。");
                 return false;
             }
         } else {
-            if (!!!$("#room option:selected").val()) {
-                alert("ルームを選択してください。");
+            if (!!!$("#channel option:selected").val()) {
+                alert("チャンネルを選択してください。");
                 return false;
             }
         }
@@ -191,32 +233,30 @@ $(function() {
         }
         return true;
     }
-});
-</script>
-<script type="text/javascript" th:inline="javascript">
-//<![CDATA[
-$(function() {
+
+    /* Update Channel List */
     var timerId = null;
     var lastInterval = "0";
-    var doListUpdate = function() {
+    var listUpdate = function() {
         $.ajax({
             type: "GET",
-            url: [[@{'/room/listupdate'}]],
+            url: /*[[@{'/channel/listupdate'}]]*/,
             data: {userId:$("#user_id").val()},
             success: function(result){
-                result.forEach(function(rooms){
-                    var state = rooms.state;
-                    var room = rooms.room;
-                    if (!!($("#room_" + room.id).val())) {
-                        $("#room_" + room.id).text(room.roomName + "（" + state + "）").attr("data-invalid",room.invalidateFlag);
+                result.forEach(function(channels){
+                    var state = channels.state === "JOINING" ? "参加中" : "未参加";
+                    var condition = channels.condition;
+                    var channel = channels.channel;
+                    if (!!($("#channel_" + channel.id).val())) {
+                        $("#channel_" + channel.id).text(channel.channelName + "（" + condition + "）" + "[" + state + "]").attr("data-invalid",channel.invalidateFlag);
                     } else {
-                        // option 追加
-                        var parent = $("#room");
-                        var optTag = $("<option></option>").attr("data-invalid",room.invalidateFlag)
-                                        .attr("data-owner-id", room.createUserId)
-                                        .val(room.id)
-                                        .attr("id", "room_" + room.id)
-                                        .text(room.roomName + "（" + state + "）");
+                        // add option
+                        var parent = $("#channel");
+                        var optTag = $("<option></option>").attr("data-invalid",channel.invalidateFlag)
+                                        .attr("data-owner-id", channel.createUserId)
+                                        .val(channel.id)
+                                        .attr("id", "channel_" + channel.id)
+                                        .text(channel.channelName + "（" + state + "）");
                         parent.append(optTag);
                     }
                 })
@@ -224,7 +264,9 @@ $(function() {
             error: function(XMLHttpRequest, textStatus, errorThrown){
             }
         });
-        console.log("doListUpdate");
+    }
+    var doListUpdate = function() {
+        listUpdate();
         timerId = setTimeout(doListUpdate, lastInterval * 1000);
     }
 

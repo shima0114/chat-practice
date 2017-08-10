@@ -10,27 +10,26 @@ var ChatContext = function(endpoint, subscribePath) {
 
 ChatContext.prototype = {
     /**
-     * 部屋IDを指定して接続します。
-     * @param roomId 部屋ID
+     * チャンネルIDを指定して接続します。
+     * @param channelId チャンネルID
      */
-    connect : function(roomId) {
-        //$("#messages").html("");
+    connect : function(channelId) {
         //WebSocketの接続をSTOMPでラップします。stomp-websocket の JS が必要です。
         this.stompClient = Stomp.over(new WebSocket(this.endpoint));
         //接続後に部屋IDをパラメーターとしてコールバック関数を呼び出すように設定
-        this.stompClient.connect({}, this.onConnected.bind(this, roomId));
+        this.stompClient.connect({}, this.onConnected.bind(this, channelId));
     },
     /**
      * 接続後に指定した部屋の配信メッセージの購読を開始します。
-     * @param roomId メッセージを購読する部屋ID
+     * @param channelId メッセージを購読するチャンネルID
      */
-    onConnected : function(roomId) {
-        this.roomId = roomId;
-        //「/topic/room/1」のような宛先のメッセージの購読を開始します。メッセージを受信した際のコールバック関数も設定
-        this.stompClient.subscribe(this.subscribePath + roomId, this.onAcceptMessage.bind(this));
+    onConnected : function(channelId) {
+        this.channelId = channelId;
+        //「/topic/channel/1」のような宛先のメッセージの購読を開始します。メッセージを受信した際のコールバック関数も設定
+        this.stompClient.subscribe(this.subscribePath + channelId, this.onAcceptMessage.bind(this));
         // 接続中ルーム名を表示
-        var roomName = $("#room_name").val();
-        $("#status_msg").html(roomName + "に接続中");
+        var channelName = $("#channel_name").val();
+        $("#status_msg").html(channelName + "に接続中");
         $("#status").val("connect");
         $("#form").show();
         $("#leave_form").show();
@@ -38,7 +37,7 @@ ChatContext.prototype = {
         var msg = {};
         msg.message = $("#user_name").val() + "が入室しました。";
         msg.user_name = "system";
-        msg.proc = "room_in";
+        msg.proc = "channel_in";
         this.sendMessage(msg);
     },
     /**
@@ -64,7 +63,6 @@ ChatContext.prototype = {
                 }
                 setTimeout(leavePage, 5000);
                 chatContext.close();
-                onClickCloseButton = false;
             }
         } else {
             var msgBodyTag = $("<div></div>").text(retMsg.message);
@@ -90,7 +88,7 @@ ChatContext.prototype = {
             alert("接続されていません。");
             return false;
         }
-        this.stompClient.send(this.subscribePath + this.roomId, {}, JSON.stringify(message));
+        this.stompClient.send(this.subscribePath + this.channelId, {}, JSON.stringify(message));
     },
     /**
      * 接続を切断します。
@@ -99,7 +97,7 @@ ChatContext.prototype = {
         if (this.stompClient) {
             this.stompClient.disconnect();
             this.stompClient = null;
-            this.roomId = null;
+            this.channelId = null;
         }
         $("#status_msg").html("未接続");
         $("#status").val("close");
@@ -109,7 +107,7 @@ ChatContext.prototype = {
 
 function msgScroll() {
     var psconsole = $('#messages');
-    if (!!!psconsole) {
+    if (!!psconsole) {
         psconsole.scrollTop(
                 psconsole[0].scrollHeight - psconsole.height()
             );

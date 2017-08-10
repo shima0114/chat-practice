@@ -11,13 +11,13 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface HistoryRepository  extends JpaRepository<History, String> {
-    public List<History> findByRoomIdOrderByRegistDateDescIdAsc(String roomId);
+    public List<History> findByChannelIdOrderByYmdDateDescHmsTimeDescIdAsc(String channelId);
 
-    @Query("select h from History h where roomId = :roomId and day(registDate) > (day(current_timestamp()) - 2) order by registDate ASC ")
-    public List<History> findLatestHistory(@Param("roomId") String roomId);
+    @Query("select h from History h where channelId = :channelId order by ymdDate ASC, hmsTime ASC ")
+    public List<History> findLatestHistory(@Param("channelId") String channelId);
 
     @Transactional
     @Modifying
-    @Query("delete from History h where h.roomId = :roomId and day(h.registDate) < (day(current_timestamp()) -2)")
-    public int deleteClosedRoomHistoryBefore3Days(@Param("roomId") String roomId);
+    @Query("delete from History h where h.channelId = :channelId")
+    public int deleteClosedChannelHistoryBefore3Days(@Param("channelId") String channelId);
 }

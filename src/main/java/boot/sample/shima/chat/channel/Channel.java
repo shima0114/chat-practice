@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.room;
+package boot.sample.shima.chat.channel;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -12,31 +12,31 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-public class ChatRoom {
+public class Channel {
 
     @Id
     @GeneratedValue(strategy=GenerationType.AUTO)
     private String id;
 
-    private String roomName;
+    private String channelName;
 
     private String createUserId;
 
     @Column(columnDefinition="boolean default false")
     private boolean invalidateFlag;
 
-    protected ChatRoom() {}
+    protected Channel() {}
 
-    public ChatRoom(String id, String roomName, String createUserId, boolean invalidateFlag) {
+    public Channel(String id, String channelName, String createUserId, boolean invalidateFlag) {
         this.id = id;
-        this.roomName = roomName;
+        this.channelName = channelName;
         this.createUserId = createUserId;
         this.invalidateFlag = invalidateFlag;
     }
 
     @Override
     public String toString() {
-        return String.format("ChatRoom[id=%s, roomName=%s, createUserName=%s, invalidate=%s]",
-                this.id, this.roomName, this.createUserId, this.invalidateFlag);
+        return String.format("TalkChannel[id=%s, channelName=%s, createUserName=%s, invalidate=%s]",
+                this.id, this.channelName, this.createUserId, this.invalidateFlag);
     }
 }

@@ -14,8 +14,8 @@ public class HistoryController {
     private HistoryService histories;
 
     @RequestMapping("/history/write")
-    public void write(@RequestParam String  roomId, @RequestParam String userName, @RequestParam String message) {
-        histories.registMessageHistory(roomId, userName, message);
+    public void write(@RequestParam String  channelId,@RequestParam String userId, @RequestParam String userName, @RequestParam String message) {
+        histories.registMessageHistory(channelId, userId, userName, message);
     }
 
 }

@@ -7,6 +7,7 @@ import org.springframework.core.annotation.Order;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.builders.WebSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
@@ -16,6 +17,7 @@ import boot.sample.shima.chat.user.ChatUserService;
 
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
+@EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
     @Autowired
@@ -52,7 +54,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .logoutSuccessUrl("/")
                 .deleteCookies("JSESSIONID")
                 .invalidateHttpSession(true)
-                .permitAll();
+                .permitAll()
+                .and()
+                .sessionManagement()
+                .maximumSessions(1)
+                //.maxSessionsPreventsLogin(true)
+                .expiredUrl("/");
     }
 
     @Autowired

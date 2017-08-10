@@ -20,6 +20,7 @@ public class ChatUserService implements UserDetailsService {
         user.setUserName(userName);
         user.setPassword(new BCryptPasswordEncoder().encode(password));
         user.setAuthority(Authority.ROLE_USER);
+        user.setEnabled(true);
         repo.save(user);
         return user;
     }

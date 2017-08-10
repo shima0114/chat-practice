@@ -1,6 +1,7 @@
 package boot.sample.shima.chat.history;
 
-import java.sql.Timestamp;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -14,29 +15,32 @@ public class HistoryService {
 
     private List<History> historyList = new ArrayList<>();
 
-    public void registMessageHistory(String roomId, String userName, String message) {
+    public void registMessageHistory(String channelId, String userId, String userName, String message) {
         History history = new History();
-        history.setRoomId(roomId);
+        history.setChannelId(channelId);
+        history.setUserId(userId);
         history.setUserName(userName);
         history.setMessage(message);
-        history.setRegistDate(new Timestamp(System.currentTimeMillis()));
+        LocalDateTime ldt = LocalDateTime.now();
+        history.setYmdDate(ldt.format(DateTimeFormatter.ISO_LOCAL_DATE));
+        history.setHmsTime(ldt.format(DateTimeFormatter.ISO_LOCAL_TIME));
         repo.save(history);
     }
 
-    public List<History> getHistories(String roomId) {
-        historyList = repo.findLatestHistory(roomId);
+    public List<History> getHistories(String channelId) {
+        historyList = repo.findLatestHistory(channelId);
         if (historyList == null) {
             return Collections.emptyList();
         }
         return historyList;
     }
 
-    public void deleteClosedRoomHistoryBefore3Days(String roomId) {
-        repo.deleteClosedRoomHistoryBefore3Days(roomId);
+    public void deleteClosedChannelHistoryBefore3Days(String channelId) {
+        repo.deleteClosedChannelHistoryBefore3Days(channelId);
     }
 
-    public boolean hasClosedRoomHistory(String roomId) {
-        List<History> hList = repo.findByRoomIdOrderByRegistDateDescIdAsc(roomId);
+    public boolean hasClosedChannelHistory(String channelId) {
+        List<History> hList = repo.findByChannelIdOrderByYmdDateDescHmsTimeDescIdAsc(channelId);
         return hList == null ? false : hList.isEmpty() ? false : true;
     }
 }
