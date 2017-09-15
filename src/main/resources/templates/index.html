@@ -1,7 +1,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
     <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
-    <script th:src="@{/js/jquery-3.2.1.min.js}"></script>
+    <script th:src="@{/webjars/jquery/2.2.4/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/3.3.6/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}"></link>
   </head>
   <body>
     <!-- ログインが失敗した時のメッセージ -->
@@ -10,25 +12,61 @@
       <strong>ログインに失敗しました: </strong>ユーザが存在しないか、パスワードが間違っています。
     </div>
     <form name="login_form" id="login_form" th:action="@{/login}" method="post">
-      <div>
-        <span th:text="${prompt_msg}">ログイン情報を入力</span>
-        <div>ユーザーID<input type="text" name="userId" id="user_id" th:value="${userId}" placeholder="ユーザーIDを入力"></input></div>
-        <div>パスワード<input type="password" name="password" id="user_pass"></input></div>
-        <div><input type="submit" id="logon_btn" value="ログイン"></input></div>
+      <div class="panel panel-primary">
+        <div class="panel-heading" th:text="${prompt_msg}">ログイン情報を入力</div>
+        <div class="panel-body">
+          <form>
+            <div class="form-group">
+              <div class="input-group">ユーザーID</div>
+              <input class="form-control" type="text" name="userId" id="user_id" th:value="${userId}" placeholder="ユーザーIDを入力"></input>
+            </div>
+            <div class="form-group">
+              <div class="input-group">パスワード</div>
+              <input class="form-control" type="password" name="password" id="user_pass"></input>
+            </div>
+            <div class="form-group">
+              <input class="btn btn-default" type="submit" id="logon_btn" value="ログイン"></input>
+              <input class="btn btn-default" type="button" id="toggle_mode" data-toggle="modal" data-target="#modal_create_user" value="新規ユーザーを作成" data-mode="create"></input>
+            </div>
+          </form>
+        </div>
       </div>
     </form>
-    <form name="create_user_form" id="create_user_form" th:action="@{/create}" method="post" style="display:none">
-      <div style="margin-bottom: 20px;">
-        <span>新規ユーザー作成</span>
-        <div>ユーザーID<input type="text" name="newUserId" id="new_user_id" placeholder="ユーザーIDを入力"></input></div>
-        <div>表示名　　<input type="text" name="newUserName" id="new_user_name" placeholder="表示名を入力"></input></div>
-        <div>パスワード<input type="password" name="newPassword1" id="new_user_pass_1"></input></div>
-        <div>確認用　　<input type="password" name="newPassword2" id="new_user_pass_2"></input></div>
-        <div class="err_msg" id="err_msg"></div>
-        <div><input type="button" id="create_btn" value="作成"></input></div>
+
+  <!-- modal create user -->
+  <div class="modal fade" id="modal_create_user">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="panel panel-primary">
+            <div class="panel-heading">新規ユーザー作成</div>
+            <div class="panel-body">
+              <form name="create_user_form" id="create_user_form" th:action="@{/create}" method="post">
+                <div class="form-group" id="group-user-id">
+                  <div class="input-group">ユーザーID</div>
+                  <input class="form-control" type="text" name="newUserId" id="new_user_id" placeholder="ユーザーIDを入力"></input>
+                </div>
+                <div class="form-group" id="group-user-name">
+                  <div class="input-group">表示名</div>
+                  <input class="form-control" type="text" name="newUserName" id="new_user_name" placeholder="表示名を入力"></input>
+                </div>
+                <div class="form-group" id="group-pass-1">
+                  <div class="input-group">パスワード</div>
+                  <input class="form-control" type="password" name="newPassword1" id="new_user_pass_1"></input>
+                </div>
+                <div class="form-group" id="group-pass-2">
+                  <div class="input-group">パスワード（※確認用）</div>
+                  <input class="form-control" type="password" name="newPassword2" id="new_user_pass_2"></input>
+                </div>
+                <div class="text-center"><input class="btn btn-block btn-primary" type="button" id="create_btn" value="作成"></input></div>
+                <div class="err_msg" id="err_msg"></div>
+              </form>
+            </div>
+          </div>
+        </div>
       </div>
-    </form>
-    <input type="button" id="toggle_mode" value="新規ユーザーを作成" data-mode="create"></input>
+    </div>
+  </div>
 </body>
 <script type="text/javascript" th:inline="javascript">
 $(function() {
@@ -41,12 +79,37 @@ $(function() {
         var pass2 = $("#new_user_pass_2").val();
         if (pass1 != pass2) {
             $("#err_msg").text("パスワードが一致していません。");
+            $("#group-pass-1").addClass("has-error");
+            $("#group-pass-2").addClass("has-error");
             return false;
         }
-        $("#create_user_form").submit();
+        $.ajax({
+            type: "GET",
+            url: /*[[@{'/user/exists'}]]*/,
+            data: {
+                    userId:$("#new_user_id").val()
+            },
+            success: function(result){
+                if (result == false) {
+                    $("#create_user_form").submit();
+                } else {
+                    $("#err_msg").text("IDがすでに使用されています。");
+                    $("#group-user-id").addClass("has-error");
+                    return false;
+                }
+            },
+            error: function(XMLHttpRequest, textStatus, errorThrown){
+            }
+        });
     });
 
-    $("#toggle_mode").on("click", function() {
+    $("#modal_create_user").on("hidden.bs.modal", function() {
+        $("#create_user_form").find("input.form-control").val("");
+        $("#create_user_form").find(".form-group").removeClass("has-error");
+        $("#err_msg").text("");
+    });
+
+    /*$("#toggle_mode").on("click", function() {
         $("#create_user_form").toggle();
         $("#login_form").toggle();
         if ($("#toggle_mode").data("mode") === "create") {
@@ -56,22 +119,27 @@ $(function() {
             $("#toggle_mode").val("新規ユーザーを作成");
             $("#toggle_mode").data("mode", "create");
         }
-    });
+    });*/
 
     function requiredCheck() {
+        var hasInvalid = false;
         if (!!!$("#new_user_id").val()) {
-            return false;
+            hasInvalid = true;
+            $("#group-user-id").addClass("has-error");
         }
         if (!!!$("#new_user_name").val()) {
-            return false;
+            hasInvalid = true;
+            $("#group-user-name").addClass("has-error");
         }
         if (!!!$("#new_user_pass_1").val()) {
-            return false;
+            hasInvalid = true;
+            $("#group-pass-1").addClass("has-error");
         }
         if (!!!$("#new_user_pass_2").val()) {
-            return false;
+            hasInvalid = true;
+            $("#group-pass-2").addClass("has-error");
         }
-        return true;
+        return !hasInvalid;
     }
 });
 </script>

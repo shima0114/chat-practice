@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.channel;
+package boot.sample.shima.chat.entity.key;
 
 import java.io.Serializable;
 

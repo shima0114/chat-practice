@@ -1,18 +1,20 @@
 package boot.sample.shima.chat.controller;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
+import boot.sample.shima.chat.entity.AttachmentFile;
+import boot.sample.shima.chat.entity.ChatUser;
+import boot.sample.shima.chat.entity.key.ChannelScopeKey;
+import boot.sample.shima.chat.service.AttachmentFileService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import boot.sample.shima.chat.channel.Channel;
-import boot.sample.shima.chat.channel.ChannelService;
-import boot.sample.shima.chat.channel.ChannelService.Channels;
+import boot.sample.shima.chat.entity.Channel;
+import boot.sample.shima.chat.service.ChannelService;
+import boot.sample.shima.chat.service.ChannelService.Channels;
 
 @RestController
 public class ChannelController {
@@ -20,15 +22,26 @@ public class ChannelController {
     @Autowired
     ChannelService channelService;
 
+    @Autowired
+    AttachmentFileService fileService;
+
     @RequestMapping(value="/channel/make",produces=MediaType.APPLICATION_JSON_VALUE)
-    public Map<String, String> createChannel(@RequestParam String channelName, @RequestParam String userId) {
+    public Map<String, String> createChannel(@RequestParam String channelName, @RequestParam String userId,
+                                             @RequestParam String channelScope, @RequestParam String scopeTarget) {
         Map<String, String> jMap = new HashMap<>();
         if (channelService.existsChannelName(channelName)) {
             jMap.put("result", "exists");
         } else {
-            Channel channel = channelService.addChannel(channelName, userId);
+            Channel channel = channelService.addChannel(channelName, userId, channelScope);
             // IDが自動生成のためチャンネル情報を取り直す
             Channels channels = channelService.getChannels(channel.getId(), userId);
+            // 公開範囲に応じて処理
+            if (ChannelScopeKey.USER.getId().equalsIgnoreCase(channelScope)) {
+                Arrays.asList(scopeTarget.split(",")).stream()
+                        .forEach(target -> {
+                            channelService.addChannelInvitation(channel.getId(), channelScope, target);
+                        });
+            }
             // 参加する
             channelService.joinChannel(channel.getId(), userId);
             jMap.put("result","success");
@@ -36,7 +49,6 @@ public class ChannelController {
             jMap.put("name", channel.getChannelName());
             jMap.put("createUserId", channel.getCreateUserId());
             jMap.put("invalidateFlag", Boolean.toString(channel.isInvalidateFlag()));
-            jMap.put("state", channels.getState());
         }
         return jMap;
     }
@@ -79,7 +91,40 @@ public class ChannelController {
 
     @RequestMapping(value="/channel/listupdate",produces=MediaType.APPLICATION_JSON_VALUE)
     public List<Channels> channelListUpdate(@RequestParam String userId) {
-        List<Channels> channelList = channelService.getAvailableChannels(userId);
+        Map<String, List<Channels>> channelListMap = new HashMap<>();
+        List<Channels> channelList = channelService.getJoiningChannels(userId);
         return channelList;
+    }
+
+    @RequestMapping("/channel/lastlogin")
+    public void channelLastLogin(@RequestParam String channelId, @RequestParam String userId) {
+        channelService.lastLogin(channelId, userId);
+    }
+
+    @RequestMapping("/channel/join")
+    public void joinChannel(@RequestParam String channelId, @RequestParam String userId) {
+        channelService.joinChannel(channelId, userId);
+    }
+
+    @RequestMapping(value="/channel/info",produces=MediaType.APPLICATION_JSON_VALUE)
+    public Map<String, Object> channelInformation(@RequestParam String channelId) {
+        Map<String, Object> infoMap = new HashMap<>();
+        // create joiner list
+        List<ChatUser> joinersList = channelService.getJoiners(channelId);
+        List<Map<String, String>> joiners = new ArrayList<Map<String, String>>();
+        // ChatUserはパスワードなども持っているため、必要な情報のみ取得する
+        joinersList.stream()
+                .forEach(joiner -> {
+                    Map<String, String> joinersMap = new HashMap<>();
+                    joinersMap.put("name", joiner.userName());
+                    joinersMap.put("id", joiner.userId());
+                    joiners.add(joinersMap);
+                });
+        infoMap.put("joiners", joiners);
+
+        // create attached file list
+        List<AttachmentFile> fileList = fileService.getAttachmentFiles(channelId);
+        infoMap.put("attachments", fileList);
+        return infoMap;
     }
 }

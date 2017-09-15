@@ -12,8 +12,8 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.util.matcher.AntPathRequestMatcher;
 
-import boot.sample.shima.chat.user.ChatUser;
-import boot.sample.shima.chat.user.ChatUserService;
+import boot.sample.shima.chat.entity.ChatUser;
+import boot.sample.shima.chat.service.ChatUserService;
 
 @Configuration
 @Order(SecurityProperties.ACCESS_OVERRIDE_ORDER)
@@ -29,13 +29,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         web.ignoring().antMatchers(
                             "/css/**",
                             "/js/**",
+                            "/webjars/**",
                             "/h2-console/**");
     }
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
         http.authorizeRequests()
-                .antMatchers("/", "/index", "/create").permitAll()
+                .antMatchers("/", "/index", "/create", "/user/exists").permitAll()
                 .anyRequest().authenticated()
                 .and()
                 .csrf()

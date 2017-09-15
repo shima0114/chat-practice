@@ -1,7 +1,9 @@
-package boot.sample.shima.chat.channel;
+package boot.sample.shima.chat.repository;
 
 import java.util.List;
 
+import boot.sample.shima.chat.entity.ChannelState;
+import boot.sample.shima.chat.entity.key.ChannelStateKey;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -12,5 +14,7 @@ public interface ChannelStateRepository extends JpaRepository<ChannelState, Chan
     public List<ChannelState> findAllByChannelId(String channelId);
 
     public int countByChannelId(String channelId);
+
+    public List<ChannelState> findAllByEntryUserIdOrderByJoiningDateTime(String entryUserId);
 
 }

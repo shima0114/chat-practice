@@ -1,13 +1,16 @@
-package boot.sample.shima.chat.user;
+package boot.sample.shima.chat.service;
 
+import java.util.List;
 import java.util.Optional;
 
+import boot.sample.shima.chat.entity.ChatUser;
+import boot.sample.shima.chat.repository.ChatUserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
-import boot.sample.shima.chat.user.ChatUser.Authority;
+import boot.sample.shima.chat.entity.ChatUser.Authority;
 
 public class ChatUserService implements UserDetailsService {
 
@@ -33,6 +36,26 @@ public class ChatUserService implements UserDetailsService {
         ChatUser user = Optional.ofNullable(repo.findByUserId(username))
                 .orElseThrow(() -> new UsernameNotFoundException(String.format("User with userId=%s was not found", username)));
         return user;
+    }
+
+    public boolean isUserExists(String userId) {
+        ChatUser user = repo.findByUserId(userId);
+        if (user != null && user.isEnabled()) {
+            return true;
+        }
+        return false;
+    }
+
+    public List<ChatUser> loadAllUser() {
+        return repo.findAll();
+    }
+
+    public List<ChatUser> loadAllOther(String userId) {
+        return repo.findAllByUserIdNot(userId);
+    }
+
+    public ChatUser loadUserByUserId(String userId) {
+        return repo.findByUserId(userId);
     }
 
 }

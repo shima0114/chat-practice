@@ -1,7 +1,8 @@
-package boot.sample.shima.chat.channel;
+package boot.sample.shima.chat.repository;
 
 import java.util.List;
 
+import boot.sample.shima.chat.entity.Channel;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -20,5 +21,7 @@ public interface ChannelRepository extends JpaRepository<Channel, String> {
     public List<Channel> findByInvalidateFlagTrue();
 
     public int countChannelNameByChannelNameAndInvalidateFlagFalse(String channelName);
+
+    public List<Channel> findAllByChannelScope(String channelScope);
 
 }

@@ -1,0 +1,58 @@
+@CHARSET "UTF-8";
+.receive {
+  text-align: left;
+  float: left;
+  max-width: 75%;
+  margin-right: auto;
+  margin-top: inherit;
+  border: solid 2px;
+  border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+}
+.receive-name {
+  text-align: left;
+  font-size: 60%;
+}
+.send {
+  text-align: right;
+  float: right;
+  max-width: 75%;
+  margin-left: auto;
+  margin-top: inherit;
+  border: solid 2px;
+  border-radius: 7px;
+  -webkit-border-radius: 7px;
+  -moz-border-radius: 7px;
+}
+.send-name {
+  text-align: right;
+  font-size: 60%;
+}
+.receive-area {
+  overflow-y: scroll;
+  height: 500px;
+}
+
+.panel-form {
+  margin: unset;
+}
+
+.clear-float {
+  clear: both;
+}
+.err-msg {
+  color:red;
+}
+
+.open-channel .join-channel {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -o-text-overflow: ellipsis;
+}
+
+.nopadding {
+   padding: 0 !important;
+   margin: 0 !important;
+}

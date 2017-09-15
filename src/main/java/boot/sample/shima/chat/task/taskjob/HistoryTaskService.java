@@ -6,9 +6,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import boot.sample.shima.chat.channel.Channel;
-import boot.sample.shima.chat.channel.ChannelService;
-import boot.sample.shima.chat.history.HistoryService;
+import boot.sample.shima.chat.entity.Channel;
+import boot.sample.shima.chat.service.ChannelService;
+import boot.sample.shima.chat.service.HistoryService;
 
 @Component
 public class HistoryTaskService {

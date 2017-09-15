@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.channel;
+package boot.sample.shima.chat.entity;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -25,18 +25,21 @@ public class Channel {
     @Column(columnDefinition="boolean default false")
     private boolean invalidateFlag;
 
-    protected Channel() {}
+    private String channelScope;
 
-    public Channel(String id, String channelName, String createUserId, boolean invalidateFlag) {
+    public Channel() {}
+
+    public Channel(String id, String channelName, String createUserId, boolean invalidateFlag, String channelScope) {
         this.id = id;
         this.channelName = channelName;
         this.createUserId = createUserId;
         this.invalidateFlag = invalidateFlag;
+        this.channelScope = channelScope;
     }
 
     @Override
     public String toString() {
-        return String.format("TalkChannel[id=%s, channelName=%s, createUserName=%s, invalidate=%s]",
-                this.id, this.channelName, this.createUserId, this.invalidateFlag);
+        return String.format("TalkChannel[id=%s, channelName=%s, createUserName=%s, invalidate=%s, channelScope=%s]",
+                this.id, this.channelName, this.createUserId, this.invalidateFlag, this.channelScope);
     }
 }

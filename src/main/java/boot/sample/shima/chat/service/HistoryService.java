@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.history;
+package boot.sample.shima.chat.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
+import boot.sample.shima.chat.entity.History;
+import boot.sample.shima.chat.repository.HistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
 public class HistoryService {
@@ -15,15 +17,14 @@ public class HistoryService {
 
     private List<History> historyList = new ArrayList<>();
 
-    public void registMessageHistory(String channelId, String userId, String userName, String message) {
+    public void registMessageHistory(String channelId, String userId, String userName, String message, String type) {
         History history = new History();
         history.setChannelId(channelId);
         history.setUserId(userId);
         history.setUserName(userName);
         history.setMessage(message);
-        LocalDateTime ldt = LocalDateTime.now();
-        history.setYmdDate(ldt.format(DateTimeFormatter.ISO_LOCAL_DATE));
-        history.setHmsTime(ldt.format(DateTimeFormatter.ISO_LOCAL_TIME));
+        history.setType(type);
+        history.setSendTime(LocalDateTime.now());
         repo.save(history);
     }
 
@@ -40,7 +41,18 @@ public class HistoryService {
     }
 
     public boolean hasClosedChannelHistory(String channelId) {
-        List<History> hList = repo.findByChannelIdOrderByYmdDateDescHmsTimeDescIdAsc(channelId);
+        List<History> hList = repo.findByChannelIdOrderBySendTimeDescIdAsc(channelId);
         return hList == null ? false : hList.isEmpty() ? false : true;
+    }
+
+    public int getUnreadCount(String channelId, LocalDateTime dateTime) {
+        if (dateTime == null) {
+            dateTime = LocalDateTime.MIN;
+        }
+        return repo.countIntByChannelIdAndSendTimeAfter(channelId, dateTime);
+    }
+
+    public int getAllCount(String channelId) {
+        return repo.countIntByChannelId(channelId);
     }
 }

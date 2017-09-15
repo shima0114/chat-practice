@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.user;
+package boot.sample.shima.chat.entity;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -41,7 +41,7 @@ public class ChatUser implements UserDetails {
     @Column(columnDefinition="boolean default true")
     private boolean isEnabled;
 
-    protected ChatUser() {}
+    public ChatUser() {}
 
     public ChatUser(String userId, String userName, String password, Authority auth, boolean isEnabled) {
         this.userId = userId;

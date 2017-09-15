@@ -6,25 +6,18 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import boot.sample.shima.chat.channel.ChannelService;
-import boot.sample.shima.chat.user.ChatUser;
-import boot.sample.shima.chat.user.ChatUserService;
+import boot.sample.shima.chat.service.ChannelService;
+import boot.sample.shima.chat.entity.ChatUser;
+import boot.sample.shima.chat.service.ChatUserService;
+import org.springframework.web.bind.annotation.RestController;
 
-@Controller
+@RestController
 public class UserController {
-
-    @Autowired
-    private ChannelService channelService;
-
     @Autowired
     private ChatUserService userService;
 
-    @RequestMapping("/create")
-    public String createUser(Model model, @RequestParam String newUserId, @RequestParam String newUserName,
-                                            @RequestParam String newPassword1, @RequestParam String newPassword2) {
-        ChatUser chatUser = userService.create(newUserId, newUserName, newPassword1);
-        model.addAttribute("userId", chatUser.getUserId());
-        model.addAttribute("prompt_msg", "パスワードを入力し作成したユーザーでログインしてください。");
-        return "index";
+    @RequestMapping("/user/exists")
+    public boolean isUserExists(@RequestParam String userId) {
+        return userService.isUserExists(userId);
     }
 }
