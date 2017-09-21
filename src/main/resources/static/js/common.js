@@ -1,15 +1,18 @@
-function messageTag(message, userName, userId) {
-    var parent = $("<div></div>");
-    var msgTag = $("<div></div>").text(message);
-    var userTag = $("<div></div>").text(userName);
+function messageTag(message, userName, userId, userImage) {
+    var parent = $("<div></div>").addClass("chat-talk").addClass("clear-float");
+    var msgTag = $("<div></div>").text(message).addClass("talk-message");
+    var userTag = $("<div></div>").text(userName).addClass("talk-name").addClass("clear-float");
     if (userId == $("#user-id").val()) {
-        msgTag.addClass("send");
-        userTag.addClass("send-name").addClass("clear-float");
+        parent.addClass("talk-send");
     } else {
-        msgTag.addClass("receive");
-        userTag.addClass("receive-name").addClass("clear-float");
+        parent.addClass("talk-receive");
     }
     parent.append(msgTag).append(userTag);
+    if (!!userImage) {
+        var iconTag = $("<div></div>").addClass("user-icon").addClass("icon-circle");
+        var imgTag = $("<img></img>").attr("src", userImage).attr("width", "80px");
+        parent.prepend(iconTag.append(imgTag));
+    }
     return parent;
 }
 
@@ -23,7 +26,7 @@ function fileLinkTag(imgObj) {
     } else {
         srcStr = "/image/other_file.jpg";
     }
-    var parent = $("<div></div>");
+    var parent = $("<div></div>").addClass("chat-talk").addClass("clear-float");
     var imgTag = $("<img></img>")
             .addClass("img-responsive img-rounded")
             .attr("src", srcStr)
@@ -32,10 +35,10 @@ function fileLinkTag(imgObj) {
             .attr("name", imgObj.saveFileName);
     var msgSenderTag = $("<div></div>").text(imgObj.userName);
     if (imgObj.userId === $("#user-id").val()) {
-        imgTag.addClass("send");
+        parent.addClass("talk-send");
         msgSenderTag.addClass("send-name clear-float");
     } else {
-        imgTag.addClass("receive");
+        parent.addClass("talk-receive");
         msgSenderTag.addClass("receive-name clear-float");
     }
     parent.append(imgTag).append(msgSenderTag);

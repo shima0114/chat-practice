@@ -1,0 +1,102 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"></meta>
+</head>
+<body>
+    <div th:fragment="join">
+        <div class="modal" id="modal-join-channel">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">参加確認</h4>
+                    </div>
+                    <div class="modal-body">
+                        チャンネルに参加しますか？
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="join-channel-btn" onclick="joinChannel();" data-dismiss="modal">参加します！</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">やめる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:fragment="withdrawal">
+        <div class="modal" id="modal-withdrawal-channel">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">登録解除</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label id="modal-withdrawal-msg-normal">チャンネル登録を解除しますか？</label>
+                        <label id="modal-withdrawal-msg-invitation">招待されたチャンネルの登録を解除すると、再度招待されるまで登録出来なくなりますがよろしいですか？</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="withdrawal-channel-btn" onclick="withdrawalChannel();" data-dismiss="modal">解除します</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">やっぱり残る</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:fragment="create">
+        <div class="modal fade" id="modal-create-channel">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">チャンネル作成</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="create-channel-form">
+                            <div class="form-group">
+                                <label class="input-group">チャンネル名</label>
+                                <input class="form-control" type="text" name="channel_name" id="make-channel-name"></input>
+                            </div>
+                            <div class="form-group">
+                                <label class="input-group">公開範囲</label>
+                                <div class="btn-group" data-toggle="buttons" role="group">
+                                    <label class="btn btn-default scope-group active" data-toggle="collapse" href="#set-all" data-parent="#set-parent">
+                                        <input type="radio" class="btn">全体</input>
+                                    </label>
+                                    <!--<label class="btn btn-default scope-group" data-toggle="collapse" href="#set-group" data-parent="#set-parent">
+                                      <input type="radio" class="btn">指定グループ</input>
+                                    </label>-->
+                                    <label class="btn btn-default scope-group" data-toggle="collapse" href="#set-user" data-parent="#set-parent">
+                                        <input type="radio" class="btn">指定ユーザー</input>
+                                    </label>
+                                </div>
+                                <div class="panel-group" id="set-parent">
+                                    <div class="panel">
+                                        <div id="set-all" class="panel-collapse collapse in">
+                                            <div class="panel-body">全体に公開します</div>
+                                            <input type="hidden" name="channel_scope" value="all"></input>
+                                        </div>
+                                        <!--<div id="set-group" class="panel-collapse collapse">
+                                          <div class="panel-body">グループ表示</div>
+                                          <input type="hidden" name="channel_scope" value="GROUP"></input>
+                                        </div>-->
+                                        <div id="set-user" class="panel-collapse collapse">
+                                            <div class="panel-body">ユーザー選択</div>
+                                            <!--/*/ <th:block th:each="user : ${userList}"> /*/-->
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="scope_target" th:value="${user.userId()}" th:text="${user.userName()}"></input></label>
+                                            </div>
+                                            <!--/*/ </th:block> /*/-->
+                                            <input type="hidden" name="channel_scope" value="user"></input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="create-channel-btn" onclick="createChannel();" data-dismiss="modal">作成</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

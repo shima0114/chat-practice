@@ -17,7 +17,7 @@ public class HistoryService {
 
     private List<History> historyList = new ArrayList<>();
 
-    public void registMessageHistory(String channelId, String userId, String userName, String message, String type) {
+    public void resistMessageHistory(String channelId, String userId, String userName, String message, String type) {
         History history = new History();
         history.setChannelId(channelId);
         history.setUserId(userId);
@@ -54,5 +54,9 @@ public class HistoryService {
 
     public int getAllCount(String channelId) {
         return repo.countIntByChannelId(channelId);
+    }
+
+    public List<String> getSenderUserIdList(String channelId) {
+        return repo.getSendingUserIds(channelId);
     }
 }

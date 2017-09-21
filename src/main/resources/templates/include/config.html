@@ -1,0 +1,105 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="main">
+    <link rel="stylesheet" th:href="@{/css/config.css}"></link>
+    <!-- Main area -->
+    <div class="container-fluid">
+        <div class="col-md-4 sidebar">
+            <!-- channel list area(left area) -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    基本情報
+                </div>
+                <div class="panel-body">
+                    <form th:action="@{/user/update/common}" id="user_upd_form" method="POST">
+                        <div class="form-group">
+                            <span class="control-label">ユーザーID</span>
+                            <input type="text" class="form-control" name="upd_user_id"
+                                   required="required" aria-required="true"
+                                   disabled="disabled" th:value="${userInfo.userId()}"></input>
+                            <div class="help-block">
+                                <div>ユーザーIDは変更出来ません</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <span class="control-label">ユーザー名</span>
+                            <input type="text" class="form-control" name="upd_user_name"
+                                   required="required" aria-required="true"
+                                   th:value="${userInfo.userName()}"></input>
+                        </div>
+                        <div class="form-group">
+                            <span class="control-label">パスワード</span>
+                            <div class="input-group">
+                                <input type="password" class="form-control" name="org_password"
+                                       required="required" aria-required="true" ></input>
+                                <label class="input-group-addon">パスワード変更</label>
+                                <div class="input-group-btn btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" onclick="tglBtn(this);">
+                                        <input type="button" class="btn btn-default" value="ON" id="tgl-on"></input>
+                                        <input type="button" class="btn btn-primary active" value="OFF"></input>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="chg-pwd-input" class="collapse">
+                            <div class="form-group">
+                                <span class="control-label">新パスワード</span>
+                                <input type="password" class="form-control" name="new_password"
+                                       disabled="disabled" id="new_password"></input>
+                            </div>
+                            <div class="form-group">
+                                <span class="control-label">新パスワード（確認）</span>
+                                <input type="password" class="form-control" name="new_password_c"
+                                       disabled="disabled" id="new_password_c"></input>
+                            </div>
+                            <div class="help-block">
+                                <div>新パスワード、新パスワード（確認）は変更する場合必須。</div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <input value="変更" type="button" class="btn btn-default btn-group" onclick="userUpdate();return false;"></input>
+                            <!--<input type="button" class="btn btn-group btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" aria-pressed="false"  value="パスワード変更"></input>-->
+                            <div class="help-block">
+                                <div>※変更時パスワードは必須。</div>
+                            </div>
+                        </div>
+                        <input type="hidden" name="user_id" th:value="${userInfo.userId()}"></input>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /channel list area(left area) -->
+        <!-- message area -->
+        <div class="col-md-3">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div id="status-msg">画像アイコン</div>
+                </div>
+                <div class="panel-body">
+                    <label>設定中の画像</label>
+                    <img class="icon-image" id="current-image" th:src="${userInfo.userImageBase64()}" width="200px"></img>
+                </div>
+                <div class="panel-body">
+                    <form id="image-upload-form" th:action="@{/user/update/image}" method="POST">
+                        <label class="upload-target">更新する画像</label>
+                        <img class="upload-target icon-image" id="upload-img"></img>
+                        <input type="hidden" id="image-src" name="imageSrc"></input>
+                        <div class="dg-area">
+                            <label>更新する画像をドラッグアンドドロップして下さい</label>
+                        </div>
+                        <input class="upload-target" type="button" value="更新" id="do-upload" onclick="userImageUpload();" style="display:none;"></input>
+                    </form>
+                </div>
+                <!--<div class="panel-footer">
+                    footer
+                </div>-->
+            </div>
+        </div>
+
+        <!-- /message area -->
+        <!-- right list area -->
+        <div class="col-md-2">
+        </div>
+        <!-- /right list area -->
+    </div>
+    <!-- /Main area -->
+    <script th:src="@{/js/config.js}"></script>
+</div>
+</html>

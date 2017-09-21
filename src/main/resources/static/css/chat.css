@@ -30,9 +30,14 @@
   font-size: 60%;
 }
 .receive_area {
-  overflow-y: scroll;
-  width: 500px;
-  height: 300px;
+    overflow-y: scroll;
+    width: 500px;
+    height: 300px;
+    min-width: 320px;
+    max-width: 800px;
+    margin: auto;
+    padding: 1em 2em;
+    background-color: #D8F3F0;
 }
 .clear_float {
   clear: both;

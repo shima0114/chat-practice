@@ -90,10 +90,15 @@ public class ChannelController {
     }
 
     @RequestMapping(value="/channel/listupdate",produces=MediaType.APPLICATION_JSON_VALUE)
-    public List<Channels> channelListUpdate(@RequestParam String userId) {
+    public Map<String, List<Channels>> channelListUpdate(@RequestParam String userId) {
         Map<String, List<Channels>> channelListMap = new HashMap<>();
-        List<Channels> channelList = channelService.getJoiningChannels(userId);
-        return channelList;
+        List<Channels> joiningList = channelService.getJoiningChannels(userId);
+        List<Channels> invitationList = channelService.getInvitationChannels(userId, ChannelScopeKey.USER.getId());
+        List<Channels> abstentionList = channelService.getAbstentionChannels(userId);
+        channelListMap.put("joiningList", joiningList);
+        channelListMap.put("invitationList", invitationList);
+        channelListMap.put("abstentionList", abstentionList);
+        return channelListMap;
     }
 
     @RequestMapping("/channel/lastlogin")

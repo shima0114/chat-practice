@@ -9,12 +9,16 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
 import boot.sample.shima.chat.service.ChannelService;
 import boot.sample.shima.chat.service.HistoryService;
 import boot.sample.shima.chat.entity.ChatUser;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import javax.servlet.http.HttpServletRequest;
 
 @Controller
 public class BaseController {
@@ -47,13 +51,13 @@ public class BaseController {
     }
 
     @RequestMapping("/enter")
-    public String entry(Principal principal, Model model) {
+    public String entry(Principal principal, Model model, HttpServletRequest request, RedirectAttributes redirectAttributes) {
         Authentication auth = (Authentication)principal;
         ChatUser user;
         try {
             user = (ChatUser)auth.getPrincipal();
         } catch (ClassCastException e) {
-            user = new ChatUser("admin", "admin", "admin", ChatUser.Authority.ROLE_ADMIN, true);
+            user = new ChatUser("admin", "admin", "admin", ChatUser.Authority.ROLE_ADMIN, true, null);
         }
         model.addAttribute("user", user);
         model.addAttribute("channelList", channelService.getJoiningChannels(user.getUserId()));
@@ -61,6 +65,11 @@ public class BaseController {
         model.addAttribute("abstentionList", channelService.getAbstentionChannels(user.getUserId()));
         model.addAttribute("userList", userService.loadAllOther(user.getUserId()));
         model.addAttribute("channelScope", ChannelScopeKey.values());
+
+        // リダイレクト時のエラー
+        if (redirectAttributes.containsAttribute("errMsg")) {
+            model.addAttribute("errMsg", redirectAttributes.asMap().get("errMsg").toString());
+        }
         return "enter";
     }
 

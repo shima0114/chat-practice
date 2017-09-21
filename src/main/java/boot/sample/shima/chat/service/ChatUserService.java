@@ -58,4 +58,29 @@ public class ChatUserService implements UserDetailsService {
         return repo.findByUserId(userId);
     }
 
+    public ChatUser updateUser(String userId, String userName, String password) {
+        // id, passwordが一致したら更新
+        ChatUser user = repo.findByUserId(userId);
+        if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
+            user.setUserName(userName);
+            return repo.save(user);
+        }
+        return null;
+    }
+
+    public ChatUser updateUser(String userId, String userName, String oldPassword, String newPassword) {
+        // id, passwordが一致したら更新
+        ChatUser user = repo.findByUserId(userId);
+        if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
+            user.setUserName(userName);
+            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+            return repo.save(user);
+        }
+        return null;
+    }
+
+    public ChatUser save(ChatUser user) {
+        return repo.save(user);
+    }
+
 }

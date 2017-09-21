@@ -1,0 +1,198 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<div th:fragment="main">
+    <!-- Main area -->
+    <div class="container-fluid">
+        <div class="col-md-3 sidebar">
+            <!-- channel list area(left area) -->
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    チャンネル一覧
+                </div>
+                <div class="panel-body">
+                    <div class="text-right">
+                        <div class="btn-group">
+                            <button type="button" class="btn btn-default btn-xs dropdown-toggle"
+                                    data-toggle="dropdown" aria-expanded="false">
+                                リスト更新
+                                <span class="caret"></span>
+                            </button>
+                            <ul class="dropdown-menu" role="menu" id="update-interval">
+                                <li role="presentation">
+                                    <a href="#" role="menuitem" tabindex="-1" data-interval="0" selected="true">
+                                        <span class="glyphicon glyphicon-ok" aria-hidden="true" id="check-icon"></span>なし
+                                    </a>
+                                </li>
+                                <li role="presentation"><a href="#" role="menuitem" tabindex="-1" data-interval="3">3秒</a></li>
+                                <li role="presentation"><a href="#" role="menuitem" tabindex="-1" data-interval="5">5秒</a></li>
+                                <li role="presentation"><a href="#" role="menuitem" tabindex="-1" data-interval="10">10秒</a></li>
+                                <li role="presentation"><a href="#" role="menuitem" tabindex="-1" data-interval="30">30秒</a></li>
+                                <li role="presentation"><a href="#" role="menuitem" tabindex="-1" data-interval="60">60秒</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <ul class="list-group">
+                        <li class="list-group-item">
+                            <a data-toggle="collapse" href="#reg-grp" class="list-menu">
+                                <span class="glyphicon glyphicon-plus"></span>登録済
+                            </a>
+                            <div id="reg-grp" class="panel-collapse collapse in">
+                                <div class="panel-body">
+                                    <!--/*/ <th:block th:if="${#lists.isEmpty(channelList)}"> /*/-->
+                                    <label>登録済のチャンネルがありません。</label>
+                                    <!--/*/ </th:block> /*/-->
+                                    <!--/*/ <th:block th:each="channels : ${channelList}" th:with="channel = ${channels.getChannel()}"> /*/-->
+                                    <div class="input-group">
+                                        <a href="#" class="open-channel btn btn-default form-control" th:id="|channel-${channel.id}|"
+                                           th:attr="data-channel-id=${channel.id},data-channel-name=${channel.channelName}"
+                                           onclick="openChannel($(this))">
+                                            <label class="join-channel-name" th:text="${channel.channelName}"></label>
+                                            <span class="badge" th:text="${channels.getUnread()}"></span>
+                                        </a>
+                                        <a href="#" class="withdrawal-btn btn btn-default input-group-addon" aria-hidden="true"
+                                           data-toggle="modal" data-target="#modal-withdrawal-channel"
+                                           th:attr="data-channel-id=${channel.id},data-channel-scope=${channel.channelScope}">
+                                            <i class="glyphicon glyphicon-remove-circle" data-toggle="tooltip" title="登録解除" data-placement="left"></i>
+                                        </a>
+                                    </div>
+                                    <!--/*/ </th:block> /*/-->
+
+                                    <div class="input-group" id="join-list-base" style="display:none">
+                                        <a href="#" class="open-channel btn btn-default form-control" id=""
+                                           data-channel-id="" data-channel-name="" onclick="openChannel($(this))">
+                                            <label class="join-channel-name"></label>
+                                            <span class="badge"></span>
+                                        </a>
+                                        <a href="#" class="withdrawal-btn btn btn-default input-group-addon" aria-hidden="true"
+                                           data-toggle="modal" data-target="#modal-withdrawal-channel" data-channel-id="">
+                                            <i class="glyphicon glyphicon-remove-circle" data-toggle="tooltip" title="登録解除" data-placement="left"></i>
+                                        </a>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <a data-toggle="collapse" href="#inv-grp" class="list-menu">
+                                <span class="glyphicon glyphicon-plus"></span>招待済
+                            </a>
+                            <div id="inv-grp" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="list-group">
+                                        <!--/*/ <th:block th:if="${#lists.isEmpty(invitationList)}"> /*/-->
+                                        <label>招待されたチャンネルがありません。</label>
+                                        <!--/*/ </th:block> /*/-->
+                                        <!--/*/ <th:block th:each="channels : ${invitationList}" th:with="channel = ${channels.getChannel()}"> /*/-->
+                                        <a href="#" class="btn btn-xs btn-default list-group-item" th:id="|channel-${channel.id}|"
+                                           th:attr="data-channel-id=${channel.id},data-channel-name=${channel.channelName},data-channel-scope=${channel.channelScope}"
+                                           data-toggle="modal" data-target="#modal-join-channel">
+                                            <label th:text="${channel.channelName}"></label>
+                                        </a>
+                                        <!--/*/ </th:block> /*/-->
+                                        <div id="invitation-base" style="display:none">
+                                            <a href="#" class="btn btn-xs btn-default list-group-item"
+                                               data-channel-id="" data-channel-name="" data-channel-scope=""
+                                               data-toggle="modal" data-target="#modal-join-channel">
+                                                <label>invitation-base</label>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                        <li class="list-group-item">
+                            <a data-toggle="collapse" href="#other-grp" class="list-menu">
+                                <span class="glyphicon glyphicon-plus"></span>未登録
+                            </a>
+                            <div id="other-grp" class="panel-collapse collapse">
+                                <div class="panel-body">
+                                    <div class="list-group">
+                                        <!--/*/ <th:block th:if="${#lists.isEmpty(abstentionList)}"> /*/-->
+                                        <label>登録可能なチャンネルがありません。</label>
+                                        <!--/*/ </th:block> /*/-->
+                                        <!--/*/ <th:block th:each="channels : ${abstentionList}" th:with="channel = ${channels.getChannel()}"> /*/-->
+                                        <a href="#" class="btn btn-xs btn-default list-group-item" th:id="|channel-${channel.id}|"
+                                           th:attr="data-channel-id=${channel.id},data-channel-name=${channel.channelName},data-channel-scope=${channel.channelScope}"
+                                           data-toggle="modal" data-target="#modal-join-channel">
+                                            <label th:text="${channel.channelName}"></label>
+                                        </a>
+                                        <!--/*/ </th:block> /*/-->
+                                        <div id="abstention-base" style="display:none">
+                                            <a href="#" class="btn btn-xs btn-default list-group-item"
+                                               data-channel-id="" data-channel-name="" data-channel-scope=""
+                                               data-toggle="modal" data-target="#modal-join-channel">
+                                                <label>abstention-base</label>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </li>
+                    </ul>
+                    <input type="hidden" id="channel-id"></input>
+                </div>
+            </div>
+        </div>
+        <!-- /channel list area(left area) -->
+        <!-- message area -->
+        <div class="col-md-6">
+            <div class="panel panel-default">
+                <div class="panel-heading">
+                    <div id="status-msg" style="color: #f00">未接続</div>
+                </div>
+                <div class="panel-body" style="padding:unset;">
+                    <form th:action="@{/file/upload}" method="post" enctype="multipart/form-data" id="file-upload-form" class="panel-form" draggable="true">
+                        <div class="receive-area" id="messages">
+                        </div>
+                        <input id="fileInput" type="file" value="" name="uploadFile" style="display:none"></input>
+                    </form>
+                </div>
+                <div class="panel-footer">
+                    <form class="panel-form">
+                        <fieldset id="msg-field" disabled="disabled">
+                            <div class="form-group" style="margin:unset">
+                                <div class="input-group">
+                                    <input class="form-control" type="text" id="message" placeholder="入力してください。"></input>
+                                    <span class="input-group-btn">
+                      <input class="btn btn-default" type="button" id="send-message" value="送信"></input>
+                      <input class="btn btn-default" type="button" id="leave-channel" value="退席"></input>
+                    </span>
+                                </div>
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <!-- /message area -->
+        <!-- right list area -->
+        <div class="col-md-2">
+            <div id="channel-information" style="display:none">
+                <ul class="nav nav-tabs">
+                    <li class="active"><a href="#joiners-tab" data-toggle="tab">参加者</a></li>
+                    <li><a href="#attached-tab" data-toggle="tab">添付ファイル</a></li>
+                </ul>
+                <div class="tab-content">
+                    <div role="tabpanel" class="tab-pane active" id="joiners-tab">
+                    </div>
+                    <div role="tabpanel" class="tab-pane" id="attached-tab">
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- /right list area -->
+    </div>
+    <script th:src="@{/js/chat-base.js}"></script>
+    <!-- /Main area -->
+    <!-- modal area -->
+    <input type="hidden" id="modal-channel-id"></input>
+    <input type="hidden" id="modal-channel-scope"></input>
+    <!-- modal join channel -->
+    <div th:include="modal/channel::join"></div>
+    <!-- modal withdrawal channel -->
+    <div th:include="modal/channel::withdrawal"></div>
+    <!-- modal create channel -->
+    <div th:include="modal/channel::create"></div>
+    <!-- /mnodal withdrawal channel -->
+    <script th:src="@{/js/modal-channel.js}"></script>
+    <!-- /modal area -->
+</div>
+</html>

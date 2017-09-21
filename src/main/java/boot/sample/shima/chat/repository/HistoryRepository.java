@@ -26,4 +26,7 @@ public interface HistoryRepository  extends JpaRepository<History, String> {
     public int countIntByChannelIdAndSendTimeAfter(String channelId, LocalDateTime dateTime);
 
     public int countIntByChannelId(String channelId);
+
+    @Query("select h.userId from History h where h.channelId = :channelId group by h.userId")
+    public List<String> getSendingUserIds(@Param("channelId") String channelId);
 }

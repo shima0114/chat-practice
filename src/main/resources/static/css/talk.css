@@ -1,38 +1,68 @@
 @CHARSET "UTF-8";
-.receive {
-  text-align: left;
-  float: left;
-  max-width: 75%;
-  margin-right: auto;
-  margin-top: inherit;
-  border: solid 2px;
-  border-radius: 7px;
-  -webkit-border-radius: 7px;
-  -moz-border-radius: 7px;
-}
-.receive-name {
-  text-align: left;
-  font-size: 60%;
-}
-.send {
-  text-align: right;
-  float: right;
-  max-width: 75%;
-  margin-left: auto;
-  margin-top: inherit;
-  border: solid 2px;
-  border-radius: 7px;
-  -webkit-border-radius: 7px;
-  -moz-border-radius: 7px;
-}
-.send-name {
-  text-align: right;
-  font-size: 60%;
-}
 .receive-area {
   overflow-y: scroll;
   height: 500px;
+  overflow-y: scroll;
+  margin: auto;
+  padding: 1em 2em;
+  background-color: #D8F3F0;
 }
+.chat-talk {
+  overflow: hidden;
+  margin: 0 0 1em 0;
+  padding: 0;
+}
+.talk-receive {
+  text-align: left;
+  float: left;
+}
+.talk-send {
+  text-align: right;
+  float: right;
+}
+.talk-name {
+  font-size: 60%;
+}
+.talk-message {
+    position: relative;
+    box-sizing: border-box;
+    width: auto;
+    min-height: 50px;
+    border-radius: 10px;
+    background-color: #fff;
+    margin: 0 auto 0 70px;
+    padding: 1em;
+}
+.chat-talk .talk-message:before {
+  position: absolute;
+  top: 15px;
+  left: -20px;
+  display: block;
+  width: 0;
+  height: 0;
+  content: '';
+  border: 10px solid transparent;
+  border-right-color: #FFFFFF;
+}
+.chat-talk .user-icon {
+   float: left;
+   width: auto;
+ }
+.chat-talk.talk-send .talk-message {
+   margin: 0 90px 0 auto;
+   color: #000;
+   background: #78FF6C;
+ }
+ .chat-talk.talk-send .talk-message:before {
+   right: -20px;
+   left: auto;
+   border-color: transparent;
+   border-left-color: #78FF6C;
+ }
+.chat-talk.talk-send .user-icon {
+   float: right;
+   width: auto;
+ }
 
 .panel-form {
   margin: unset;

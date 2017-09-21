@@ -2,7 +2,8 @@ package boot.sample.shima.chat;
 
 import java.util.concurrent.Executor;
 
-import boot.sample.shima.chat.service.AttachmentFileService;
+import boot.sample.shima.chat.entity.ChatGroup;
+import boot.sample.shima.chat.service.*;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
@@ -10,10 +11,6 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.scheduling.annotation.SchedulingConfigurer;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.scheduling.config.ScheduledTaskRegistrar;
-
-import boot.sample.shima.chat.service.ChannelService;
-import boot.sample.shima.chat.service.HistoryService;
-import boot.sample.shima.chat.service.ChatUserService;
 
 @SpringBootApplication
 @EnableScheduling
@@ -37,6 +34,11 @@ public class ChatPracticeApplication implements SchedulingConfigurer {
     @Bean
     public AttachmentFileService fileService() {
         return new AttachmentFileService();
+    }
+
+    @Bean
+    public ChatGroupService groupService() {
+        return new ChatGroupService();
     }
 
     public static void main(String[] args) {
