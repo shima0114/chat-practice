@@ -2,7 +2,7 @@ package boot.sample.shima.chat.entity.key;
 
 public enum ChannelScopeKey {
     ALL("all", "ALL", "全体公開"),
-    //GROUP("group", "GROUP", "指定グループ"),
+    GROUP("group", "GROUP", "指定グループ"),
     USER("user", "USER", "指定ユーザー"),
     ;
 

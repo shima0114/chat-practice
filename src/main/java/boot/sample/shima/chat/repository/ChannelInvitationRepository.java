@@ -9,8 +9,10 @@ import java.util.List;
 
 @Repository
 public interface ChannelInvitationRepository extends JpaRepository<ChannelInvitation, String> {
-    List<ChannelInvitation> findAllByScopeAndTargetId(String scope, String id);
+    List<ChannelInvitation> findAllByTargetId(String id);
 
     @Transactional
     void deleteByChannelIdAndTargetId(String channelId, String targetId);
+
+    List<ChannelInvitation> findAllByChannelId(String channelId);
 }

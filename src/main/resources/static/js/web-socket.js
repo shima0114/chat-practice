@@ -39,6 +39,7 @@
             } else {
                 if (retMsg.type == "file-link") {
                     var fileInfo = retMsg.attr;
+                    fileInfo.userName = fileInfo.userName + createSendTime();
                     $("#messages").append(fileLinkTag(fileInfo));
                     var linkParent = $("<div></div>");
                     var linkTag = $("<a></a>").attr("href", "/file/download/" + fileInfo.fileId)
@@ -47,7 +48,7 @@
                     $("#attached-tab").append(linkParent.append(linkTag));
                     imageScroll();
                 } else if (retMsg.type == "message") {
-                    $("#messages").append(messageTag(retMsg.message, retMsg.user_name, retMsg.user_id));
+                    $("#messages").append(messageTag(retMsg.message, retMsg.user_name + createSendTime(), retMsg.user_id, retMsg.user_image));
                 }
             }
             msgScroll();
@@ -67,6 +68,7 @@
         msg.message = message;
         msg.user_id = userId;
         msg.user_name = userName;
+        //msg.image = $("#user_image").attr("src");
         msg.type = type;
         if (!!attr) {
             msg.attr = attr;
@@ -87,8 +89,8 @@
         $("#msg-field").prop("disabled", true);
         $('#file-upload-form').prop("disabled", true);
         $("#channel-information").hide();
-        $("#joiners-tab").empty();
-        $("#attached-tab").empty()
+        $("#user-table-body").empty();
+        $("#attached-tab div.row").empty()
     }
 
     // enter押下

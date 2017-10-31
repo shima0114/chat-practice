@@ -8,20 +8,18 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChannelRepository extends JpaRepository<Channel, String> {
-    public Channel findByChannelNameAndInvalidateFlagFalse(String channelName);
+    Channel findByChannelNameAndInvalidateFlagFalse(String channelName);
 
-    public Channel findByIdAndInvalidateFlagFalse(String id);
+    Channel findByIdAndInvalidateFlagFalse(String id);
 
-    public Channel findById(String id);
+    Channel findById(String id);
 
-    public List<Channel> findByInvalidateFlagFalse();
+    List<Channel> findByInvalidateFlagFalse();
 
-    public List<Channel> findByInvalidateFlagFalseOrCreateUserIdOrderById(String createUserId);
+    List<Channel> findByInvalidateFlagTrue();
 
-    public List<Channel> findByInvalidateFlagTrue();
+    Integer countChannelNameByChannelNameAndInvalidateFlagFalse(String channelName);
 
-    public int countChannelNameByChannelNameAndInvalidateFlagFalse(String channelName);
-
-    public List<Channel> findAllByChannelScope(String channelScope);
+    List<Channel> findAllByChannelScope(String channelScope);
 
 }

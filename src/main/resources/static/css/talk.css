@@ -2,10 +2,15 @@
 .receive-area {
   overflow-y: scroll;
   height: 500px;
-  overflow-y: scroll;
   margin: auto;
   padding: 1em 2em;
   background-color: #D8F3F0;
+}
+.scroll-y-area {
+  overflow-y: scroll;
+  height: 500px;
+  margin: auto;
+  padding: 1em 2em;
 }
 .chat-talk {
   overflow: hidden;
@@ -17,11 +22,16 @@
   float: left;
 }
 .talk-send {
-  text-align: right;
+  text-align: left;
   float: right;
 }
 .talk-name {
   font-size: 60%;
+}
+.talk-receive .talk-name {
+}
+.talk-send .talk-name {
+  text-align: right;
 }
 .talk-message {
     position: relative;
@@ -85,4 +95,32 @@
 .nopadding {
    padding: 0 !important;
    margin: 0 !important;
+}
+.row-eq-height {
+    display: flex;
+    flex-wrap: wrap;
+}
+.lines-on-sides {
+  display: table;
+  text-align: center;
+  white-space: nowrap;
+}
+.lines-on-sides:after, .lines-on-sides:before {
+  content: '';
+  display: table-cell;
+  width: 50%;
+  background: -webkit-linear-gradient(transparent 50%, currentColor 50%, currentColor -webkit-calc(50% + 1px), transparent -webkit-calc(50% + 1px));
+  background: -webkit-gradient(linear, left top, left bottom, from(transparent), color-stop(50%, currentColor), color-stop(currentColor calc(50% + 1px)), to(transparent calc(50% + 1px)));
+  background: linear-gradient(transparent 50%, currentColor 50%, currentColor calc(50% + 1px), transparent calc(50% + 1px));
+  -webkit-background-clip: padding;
+  background-clip: padding;
+}
+.lines-on-sides:after {
+  border-left: 1em solid transparent;
+}
+.lines-on-sides:before {
+  border-right: 1em solid transparent;
+}
+.small-table {
+  font-size: 80%;
 }

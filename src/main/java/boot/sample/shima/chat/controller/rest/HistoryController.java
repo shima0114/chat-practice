@@ -1,4 +1,4 @@
-package boot.sample.shima.chat.controller;
+package boot.sample.shima.chat.controller.rest;
 
 import boot.sample.shima.chat.entity.ChatUser;
 import boot.sample.shima.chat.entity.History;
@@ -27,14 +27,7 @@ public class HistoryController {
     @RequestMapping("/history/load")
     public Map<String, Object> load(@RequestParam String channelId) {
         Map<String, Object> retMap = new HashMap<>();
-        List<String> userIdList = historyService.getSenderUserIdList(channelId);
-        Map<String, String> imageMap = new HashMap<>();
-        userIdList.stream()
-                .forEach(userId -> {
-                    ChatUser user = userService.loadUserByUserId(userId);
-                    imageMap.put(userId, user.userImageBase64());
-                });
-        retMap.put("user_images", imageMap);
+        retMap.put("senders", historyService.getSenders(channelId));
         retMap.put("history", historyService.getHistories(channelId));
         return retMap;
     }

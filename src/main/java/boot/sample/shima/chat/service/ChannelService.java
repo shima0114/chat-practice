@@ -1,22 +1,18 @@
 package boot.sample.shima.chat.service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.List;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.stream.Collectors;
 
-import boot.sample.shima.chat.entity.ChannelInvitation;
-import boot.sample.shima.chat.entity.ChatUser;
+import boot.sample.shima.chat.entity.*;
 import boot.sample.shima.chat.entity.key.ChannelScopeKey;
-import boot.sample.shima.chat.repository.ChannelInvitationRepository;
-import boot.sample.shima.chat.repository.ChannelRepository;
-import boot.sample.shima.chat.repository.ChannelStateRepository;
-import boot.sample.shima.chat.entity.Channel;
-import boot.sample.shima.chat.entity.ChannelState;
+import boot.sample.shima.chat.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.util.StringUtils;
 
 public class ChannelService {
 
@@ -27,7 +23,10 @@ public class ChannelService {
     private ChannelStateRepository stateRepo;
 
     @Autowired
-    private ChannelInvitationRepository invitationRepository;
+    private ChannelInvitationRepository invitationRepo;
+
+    @Autowired
+    private ChannelGroupRepository channelGroupRepository;
 
     @Autowired
     private HistoryService historyService;
@@ -35,24 +34,48 @@ public class ChannelService {
     @Autowired
     private ChatUserService userService;
 
-    public Channel addChannel(Channel channel) {
-        return repo.save(channel);
-    }
+    @Autowired
+    private ChatGroupService groupService;
 
-    public Channel addChannel(String channelName, String createUserId, String channelScope) {
+    public Channel updateOrInsertChannel(String channelId, String channelName, String createUserId, String channelScope, String scopeTarget) {
         Channel channel = new Channel();
-        channel.setChannelName(channelName);
-        channel.setCreateUserId(createUserId);
-        channel.setChannelScope(channelScope);
-        return addChannel(channel);
+        if (StringUtils.isEmpty(channelId)) {
+            channel.setChannelName(channelName);
+            channel.setCreateUserId(createUserId);
+            channel.setChannelScope(channelScope);
+            channel = repo.save(channel);
+        } else {
+            channel = repo.findById(channelId);
+        }
+        final String targetChannelId = channel.getId();
+
+        // 公開範囲に応じて処理
+        if (ChannelScopeKey.GROUP.getId().equalsIgnoreCase(channelScope)) {
+            // グループ情報を登録
+            Arrays.asList(scopeTarget.split(",")).stream()
+                    .forEach(target -> {
+                        ChannelGroup cGroup = new ChannelGroup();
+                        cGroup.setChannelId(targetChannelId);
+                        cGroup.setGroupId(target);
+                        channelGroupRepository.save(cGroup);
+                    });
+        } else if (ChannelScopeKey.USER.getId().equalsIgnoreCase(channelScope)) {
+            // 個別ユーザー登録
+            Arrays.asList(scopeTarget.split(",")).stream()
+                    .forEach(userId -> {
+                        addChannelInvitation(targetChannelId, userId);
+                    });
+        }
+        // 作成者本人はその場で参加
+        joinChannel(channel.getId(), createUserId);
+        return channel;
     }
 
-    public void addChannelInvitation(String channelId, String scope, String scopeTarget) {
+    private void addChannelInvitation(String channelId, String scopeTarget) {
         ChannelInvitation invitation = new ChannelInvitation();
         invitation.setChannelId(channelId);
-        invitation.setScope(scope);
         invitation.setTargetId(scopeTarget);
-        invitationRepository.save(invitation);
+        invitationRepo.save(invitation);
     }
 
     public List<Channel> getAllChannel() {
@@ -73,20 +96,67 @@ public class ChannelService {
         List<ChannelState> states = stateRepo.findAllByEntryUserIdOrderByJoiningDateTime(userId);
         states.stream().forEach(state -> {
             Channel channel = repo.findById(state.getChannelId());
-            LocalDateTime ldt = state.getLastLogin() == null ? state.getJoiningDateTime() : state.getLastLogin();
-            Channels channels = new Channels(channel, getUnread(channel.getId(), ldt));
+            Channels channels = new Channels(channel, getUnread(channel.getId(), state.lastLogin()));
             channelsList.add(channels);
         });
         return channelsList;
     }
 
-    public List<Channels> getInvitationChannels(String userId, String scope) {
+    public List<Channels> getInvitationChannelsWithoutJoining(String userId, List<Channels> joiningList) {
         List<Channels> channelsList = new ArrayList<>();
-        List<ChannelInvitation> invList = invitationRepository.findAllByScopeAndTargetId(scope, userId);
+        List<String> channelIdList = new ArrayList<>();
+        List<ChannelInvitation> invList = invitationRepo.findAllByTargetId(userId);
         invList.stream().forEach(invitation -> {
-            Channel channel = repo.findById(invitation.getChannelId());
-            channelsList.add(new Channels(channel, 0));
+            channelIdList.add(invitation.getChannelId());
         });
+        ChatUser user = userService.loadUserByUserId(userId);
+
+        groupService.getJoiningGroups(userId).stream()
+                .map(ChatGroup::getId)
+                .forEach(groupId -> {
+                    channelGroupRepository.findAllByGroupId(groupId)
+                            .stream()
+                            .map(ChannelGroup::getChannelId)
+                            .forEach(channelId -> {
+                                channelIdList.add(channelId);
+                            });
+                });
+        List<String> joiningIdList = joiningList.stream().map(Channels::getChannel).map(Channel::getId).collect(Collectors.toList());
+        channelIdList.stream()
+                .sorted()
+                .distinct()
+                .filter(channelId -> !joiningIdList.contains(channelId))
+                .forEach(channelId -> {
+                    channelsList.add(new Channels(repo.findById(channelId), 0));
+                });
+        return channelsList;
+    }
+
+    public List<Channels> getInvitationChannels(String userId) {
+        List<Channels> channelsList = new ArrayList<>();
+        List<String> channelIdList = new ArrayList<>();
+        List<ChannelInvitation> invList = invitationRepo.findAllByTargetId(userId);
+        invList.stream().forEach(invitation -> {
+            channelIdList.add(invitation.getChannelId());
+        });
+        ChatUser user = userService.loadUserByUserId(userId);
+
+        groupService.getJoiningGroups(userId).stream()
+                .map(ChatGroup::getId)
+                .forEach(groupId -> {
+                    channelGroupRepository.findAllByGroupId(groupId)
+                            .stream()
+                            .map(ChannelGroup::getChannelId)
+                            .forEach(channelId -> {
+                                channelIdList.add(channelId);
+                            });
+            });
+        channelIdList.stream()
+                .sorted()
+                .distinct()
+                .forEach(channelId -> {
+                    channelsList.add(new Channels(repo.findById(channelId), 0));
+                });
         return channelsList;
     }
 
@@ -153,9 +223,22 @@ public class ChannelService {
         repo.delete(id);
     }
 
-    public boolean existsChannelName(String channelName) {
-        int cnt = repo.countChannelNameByChannelNameAndInvalidateFlagFalse(channelName);
-        return cnt > 0;
+    public boolean existsChannelName(String channelId, String channelName) {
+        if (StringUtils.isEmpty(channelId)) {
+            // 新規の場合は同名を検索し、存在する場合はtrueを返す
+            return repo.countChannelNameByChannelNameAndInvalidateFlagFalse(channelName) > 0;
+        } else {
+            // 更新の場合、現在の名称から変更がある場合は同名を検索し、存在する場合はtrueを返す
+            Channel channel = repo.findById(channelId);
+            if (!channel.getChannelName().equals(channelName)) {
+                return repo.countChannelNameByChannelNameAndInvalidateFlagFalse(channelName) > 0;
+            }
+        }
+        return false;
+    }
+
+    public void updateChannel() {
+
     }
 
     public void joinChannel(String channelId, String userId) {
@@ -164,7 +247,7 @@ public class ChannelService {
             state = new ChannelState(userId, channelId);
         }
         stateRepo.save(state);
-        invitationRepository.deleteByChannelIdAndTargetId(channelId, userId);
+        invitationRepo.deleteByChannelIdAndTargetId(channelId, userId);
     }
 
     public void withdrawalChannel(String channelId, String userId) {
@@ -187,13 +270,55 @@ public class ChannelService {
         });
     }
 
-    public List<ChatUser> getJoiners(String channelId) {
-        List<ChatUser> userList = new ArrayList<>();
+    public List<Map<String, String>> getJoiners(String channelId) {
+        List<Map<String, String>> userList = new ArrayList<>();
         List<ChannelState> states = stateRepo.findAllByChannelId(channelId);
         states.stream().forEach(state -> {
-            userList.add(userService.loadUserByUserId(state.getEntryUserId()));
+            ChatUser user = userService.loadUserByUserId(state.getEntryUserId());
+            Map<String, String> userMap = new HashMap<>();
+            userMap.put("name", user.userName());
+            userMap.put("id", user.userId());
+            userMap.put("image", user.userImageBase64());
+            userMap.put("lastLogin", state.lastLogin().format(DateTimeFormatter.ofPattern("yyyy/MM/dd HH:mm:ss")));
+            userList.add(userMap);
         });
         return userList;
+    }
+
+    public List<Map<String, String>> getScopeTarget(String channelId) {
+        List<Map<String, String>> targetList = new ArrayList<>();
+        Channel channel = repo.findById(channelId);
+        if (channel.getChannelScope().equals(ChannelScopeKey.USER.getId())) {
+            stateRepo.findAllByChannelId(channelId)
+                    .stream()
+                    .map(ChannelState::getEntryUserId)
+                    .forEach(userId -> {
+                        Map<String, String> targetMap = new HashMap<>();
+                        targetMap.put("targetId", userId);
+                        targetMap.put("disabled", "true");
+                        targetList.add(targetMap);
+                    });
+            invitationRepo.findAllByChannelId(channelId)
+                    .stream()
+                    .map(ChannelInvitation::getTargetId)
+                    .forEach(userId -> {
+                        Map<String, String> targetMap = new HashMap<>();
+                        targetMap.put("targetId", userId);
+                        targetMap.put("disabled", "false");
+                        targetList.add(targetMap);
+                    });
+        } else if (channel.getChannelScope().equals(ChannelScopeKey.GROUP.getId())) {
+            channelGroupRepository.findAllByChannelId(channelId)
+                    .stream()
+                    .map(ChannelGroup::getGroupId)
+                    .forEach(groupId -> {
+                        Map<String, String> targetMap = new HashMap<>();
+                        targetMap.put("targetId", groupId);
+                        targetMap.put("disabled", "false");
+                        targetList.add(targetMap);
+                    });
+        }
+        return targetList;
     }
 
     @Setter

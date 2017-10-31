@@ -36,4 +36,8 @@ public class ChannelState {
         this.joiningDateTime = LocalDateTime.now();
 //        this.lastLogin =LocalDateTime.now();
     }
+
+    public LocalDateTime lastLogin() {
+        return lastLogin != null ? lastLogin : joiningDateTime;
+    }
 }

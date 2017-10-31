@@ -3,10 +3,11 @@
     <!--<link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>-->
     <link rel="stylesheet" th:href="@{/css/talk.css}"></link>
     <link rel="stylesheet" th:href="@{/css/common.css}"></link>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}"></link>
-    <script th:src="@{/webjars/jquery/2.2.4/jquery.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/3.3.6/js/bootstrap.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/3.3.6/js/tab.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"></link>
+    <link rel="stylesheet" th:href="@{/webjars/font-awesome/css/font-awesome.css}"></link>
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/tab.js}"></script>
     <script th:src="@{/js/common.js}"></script>
     <script th:src="@{/js/file-upload.js}"></script>
     <script th:src="@{/js/web-socket.js}"></script>
@@ -40,7 +41,9 @@
               <img id="user_image" th:src="${userInfo.userImageBase64()}"></img>
             </span>
             <input class="btn navbar-btn" type="button" id="make-channel-btn"
-                   data-toggle="modal" data-target="#modal-create-channel" value="部屋の作成"></input>
+                   data-toggle="modal" data-target="#modal-create-channel" value="チャンネル作成"></input>
+            <input class="btn navbar-btn" type="button" id="make-group-btn"
+                   data-toggle="modal" data-target="#modal-create-group" value="グループ作成"></input>
             <input class="btn navbar-btn" type="button" id="logout-btn" value="ログアウト"></input>
           </div>
         </div>
@@ -77,5 +80,11 @@
     </th:block>
     <form id="logout-form" th:action="@{/logout}" method="post">
     </form>
+  <!-- modal -->
+  <div th:include="modal/channel::create"></div>
+  <div th:include="modal/group::create"></div>
+  <!-- /modal js -->
+  <script th:src="@{/js/modal-channel.js}"></script>
+  <script th:src="@{/js/modal-group.js}"></script>
 </body>
 </html>

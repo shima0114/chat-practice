@@ -1,0 +1,123 @@
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8"></meta>
+</head>
+<body>
+    <div th:fragment="join">
+        <div class="modal" id="modal-join-group">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">参加確認</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label id="modal-join-group-none-auth">グループに参加しますか？</label>
+                        <div id="modal-join-group-need-auth">
+                            <label>このグループに参加するにはパスワードが必要です。</label>
+                            <input type="password" id="join-group-password"></input>
+                        </div>
+                        <input type="hidden" id="need-authorized"></input>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="join-group-btn" onclick="joinGroup();">参加します！</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">やめる</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:fragment="withdrawal">
+        <div class="modal" id="modal-withdrawal-group">
+            <div class="modal-dialog modal-sm">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">脱退確認</h4>
+                    </div>
+                    <div class="modal-body">
+                        <label id="modal-group-msg-normal">グループから脱退しますか？</label>
+                        <label id="modal-group-msg-invitation">招待されたグループから脱退すると、再度招待されるまで参加出来なくなりますがよろしいですか？</label>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="withdrawal-group-btn" onclick="withdrawalGroup();" data-dismiss="modal">脱退します</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">やっぱり残る</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div th:fragment="create">
+        <div class="modal fade" id="modal-create-group">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">グループ作成</h4>
+                    </div>
+                    <div class="modal-body">
+                        <form id="create-group-form">
+                            <div class="form-group">
+                                <label class="input-group">グループ名</label>
+                                <input class="form-control" type="text" name="channel_name" id="make-group-name"></input>
+                            </div>
+                            <div class="form-group">
+                                <span class="control-label">認証パスワード設定</span>
+                                <div class="input-group">
+                                    <div class="input-group-btn btn-toggle" data-toggle="collapse" data-target="#set-pwd-input" onclick="tglConfirmPasswordBtn(this);">
+                                        <input type="button" class="btn btn-default" value="する" id="group-toggle-on"></input>
+                                        <input type="button" class="btn btn-primary active" value="しない" id="group-toggle-off"></input>
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="set-pwd-input" class="collapse">
+                                <div class="form-group">
+                                    <label class="input-group">認証パスワード</label>
+                                    <input class="form-control" type="password" name="channel_name" id="make-group-pass"></input>
+                                </div>
+                                <div class="form-group">
+                                    <label class="input-group">認証パスワード(確認)</label>
+                                    <input class="form-control" type="password" name="channel_name" id="make-group-pass-check"></input>
+                                </div>
+                                <div class="help-block">
+                                    <div>認証パスワード、認証パスワード（確認）は登録する場合必須。</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label class="input-group">公開範囲</label>
+                                <div class="btn-group" data-toggle="buttons" role="group">
+                                    <label class="btn btn-default group-scope active" data-toggle="collapse" href="#group-scope-OPEN" data-parent="#group-scope-parent">
+                                        <input type="radio" class="btn" id="scope-OPEN">全体</input>
+                                    </label>
+                                    <label class="btn btn-default group-scope" data-toggle="collapse" href="#group-scope-CLOSED" data-parent="#group-scope-parent">
+                                        <input type="radio" class="btn" id="scope-CLOSED">指定ユーザー</input>
+                                    </label>
+                                </div>
+                                <div class="panel-group" id="group-scope-parent">
+                                    <div class="panel">
+                                        <div id="group-scope-OPEN" class="panel-collapse collapse in">
+                                            <div class="panel-body">全体に公開します</div>
+                                            <input type="hidden" name="group_scope" value="OPEN"></input>
+                                        </div>
+                                        <div id="group-scope-CLOSED" class="panel-collapse collapse">
+                                            <div class="panel-body">ユーザー選択</div>
+                                            <!--/*/ <th:block th:each="user : ${userList}"> /*/-->
+                                            <div class="checkbox">
+                                                <label><input type="checkbox" name="scope_target" th:value="${user.userId()}" th:text="${user.userName()}"></input></label>
+                                            </div>
+                                            <!--/*/ </th:block> /*/-->
+                                            <input type="hidden" name="group_scope" value="CLOSED"></input>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <input type="hidden" name="group_id" id="target-group-id" value=""></input>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-default" id="create-group-btn" onclick="createGroup();" data-dismiss="modal">作成</button>
+                        <button type="button" class="btn btn-default" data-dismiss="modal">キャンセル</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

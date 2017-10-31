@@ -2,11 +2,11 @@ package boot.sample.shima.chat.service;
 
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
+import boot.sample.shima.chat.entity.ChatUser;
 import boot.sample.shima.chat.entity.History;
+import boot.sample.shima.chat.repository.ChatUserRepository;
 import boot.sample.shima.chat.repository.HistoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 
@@ -14,6 +14,9 @@ public class HistoryService {
 
     @Autowired
     private HistoryRepository repo;
+
+    @Autowired
+    private ChatUserRepository userRepository;
 
     private List<History> historyList = new ArrayList<>();
 
@@ -56,7 +59,17 @@ public class HistoryService {
         return repo.countIntByChannelId(channelId);
     }
 
-    public List<String> getSenderUserIdList(String channelId) {
-        return repo.getSendingUserIds(channelId);
+    public Map<String, Map<String, String>> getSenders(String channelId) {
+        List<String> userIdList = repo.getSendingUserIds(channelId);
+        Map<String, Map<String, String>> imageMap = new HashMap<>();
+        userIdList.stream()
+                .forEach(userId -> {
+                    ChatUser user = userRepository.findByUserId(userId);
+                    Map<String, String> innerMap = new HashMap<>();
+                    innerMap.put("image", user.userImageBase64());
+                    innerMap.put("name", user.userName());
+                    imageMap.put(userId, innerMap);
+                });
+        return imageMap;
     }
 }

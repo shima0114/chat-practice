@@ -71,6 +71,17 @@ function checkConnection() {
     return true;
 }
 
+$(".list-group-menu").on("click", function() {
+    var $iconTag = $(this).find("span.glyphicon");
+    if ($iconTag.hasClass("glyphicon-plus")) {
+        $iconTag.removeClass("glyphicon-plus");
+        $iconTag.addClass("glyphicon-minus");
+    } else {
+        $iconTag.removeClass("glyphicon-minus");
+        $iconTag.addClass("glyphicon-plus");
+    }
+});
+
 $('#image-upload-form').on('dragover', function(evt) {
   evt.preventDefault();
   $('#drag-drop-area').addClass('dragover');
@@ -130,4 +141,82 @@ function userImageUpload() {
 //    $("#image-src").val($("#upload-img").attr("src"));
     $("#image-upload-form").append($("#user-id"));
     $("#image-upload-form").submit();
+}
+
+function updateGroupList() {
+    $(".none-group-tag").remove();
+    $.ajax({
+        type: "GET",
+        url: '/group/listUpdate',
+        data: {userId:$("#user-id").val()},
+        success: function(result){
+            var joiningList = result.joiningList;
+            var invitationList = result.invitationList;
+            var abstentionList = result.abstentionList;
+            // 参加済リスト更新
+            joiningList.forEach(function(group){
+                var groupTag = $("#reg-group").find("#group-" + group.id);
+                if (!!!groupTag.length) {
+                    var $clone = $("#group-join-list-base").clone().removeAttr("id").attr("id", "group-" + group.id);
+                    $clone.attr("data-group-id", group.id);
+                    var scope = group.scope;
+                    $clone.find("div.joining-group-name").text(group.groupName);
+                    $("#reg-group div.list-group").append($clone);
+                    if (group.createUserId !== $("#user-id").val()) {
+                        $clone.find(".conf-link").remove();
+                    }
+                    $clone.find("i").tooltip();
+                    $clone.find("#group-info-base").attr("id", "group-info-" + group.id)
+                        .attr("data-group-scope", scope)
+                        .attr("data-group-name", group.groupName)
+                        .attr("data-group-need-auth", group.needAuthorized);
+                    $clone.show();
+                }
+            });
+            if (!!!$("#reg-group div.input-group:not(#group-join-list-base)").length) {
+                var noneTag = $("<label></label>").addClass("none-group-tag").text("登録済のグループはありません。");
+                $("#reg-group div.panel-body").prepend(noneTag);
+            }
+            // 招待済リスト更新
+            invitationList.forEach(function(group){
+                var groupTag = $("#inv-group").find("#group-" + group.id);
+                if (!!!groupTag.length) {
+                    var addTag = $("#group-invitation-base a").clone();
+                    addTag.attr("id", "group-" + group.id)
+                        .attr("data-group-id", group.id)
+                        .attr("data-group-name", group.groupName)
+                        .attr("data-group-scope", group.scope);
+                    addTag.find("label").text(group.groupName);
+                    if (!!!$("#reg-group a#group-" + group.id).length) {
+                        $("#inv-group div.list-group").append(addTag);
+                    }
+                }
+            });
+            if (!!!$("#inv-group div.list-group a:not(#group-invitation-base > a)").length) {
+                var noneTag = $("<label></label>").addClass("none-group-tag").text("参加待ちのグループはありません。");
+                $("#inv-group div.list-group").prepend(noneTag);
+            }
+
+            // 未参加リスト更新
+            abstentionList.forEach(function(group){
+                var groupTag = $("#other-group").find("#group-" + group.id);
+                if (!!!groupTag.length) {
+                    var addTag = $("#group-abstention-base a").clone();
+                    addTag.attr("id", "group-" + group.id)
+                        .attr("data-group-id", group.id)
+                        .attr("data-group-name", group.groupName)
+                        .attr("data-group-scope", group.scope);
+                    addTag.find("label").text(group.groupName);
+                    $("#other-group div.list-group").append(addTag);
+                }
+            });
+            if (!!!$("#other-group div.list-group a:not(#group-abstention-base > a)").length) {
+                var noneTag = $("<label></label>").addClass("none-group-tag").text("参加可能なグループはありません。");
+                $("#other-group div.list-group").prepend(noneTag);
+            }
+
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown){
+        }
+    });
 }

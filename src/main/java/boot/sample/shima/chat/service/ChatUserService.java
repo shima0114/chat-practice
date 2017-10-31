@@ -11,6 +11,7 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import boot.sample.shima.chat.entity.ChatUser.Authority;
+import org.springframework.util.StringUtils;
 
 public class ChatUserService implements UserDetailsService {
 
@@ -58,14 +59,9 @@ public class ChatUserService implements UserDetailsService {
         return repo.findByUserId(userId);
     }
 
-    public ChatUser updateUser(String userId, String userName, String password) {
-        // id, passwordが一致したら更新
-        ChatUser user = repo.findByUserId(userId);
-        if (new BCryptPasswordEncoder().matches(password, user.getPassword())) {
-            user.setUserName(userName);
-            return repo.save(user);
-        }
-        return null;
+    private ChatUser updateUserWithPassword(ChatUser user, String newPassword) {
+        user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
+        return repo.save(user);
     }
 
     public ChatUser updateUser(String userId, String userName, String oldPassword, String newPassword) {
@@ -73,10 +69,20 @@ public class ChatUserService implements UserDetailsService {
         ChatUser user = repo.findByUserId(userId);
         if (new BCryptPasswordEncoder().matches(oldPassword, user.getPassword())) {
             user.setUserName(userName);
-            user.setPassword(new BCryptPasswordEncoder().encode(newPassword));
-            return repo.save(user);
+            if (!StringUtils.isEmpty(newPassword)) {
+                user = updateUserWithPassword(user, newPassword);
+            } else {
+                user = repo.save(user);
+            }
+            return user;
         }
         return null;
+    }
+
+    public ChatUser updateUserImage(String userId, String base64ImageSrc) {
+        ChatUser user = repo.findByUserId(userId);
+        user.setUserImageBase64(base64ImageSrc);
+        return repo.save(user);
     }
 
     public ChatUser save(ChatUser user) {

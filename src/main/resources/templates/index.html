@@ -1,9 +1,9 @@
 <html xmlns:th="http://www.thymeleaf.org">
   <head>
-    <link rel="stylesheet" type="text/css" th:href="@{/css/chat.css}"/>
-    <script th:src="@{/webjars/jquery/2.2.4/jquery.min.js}"></script>
-    <script th:src="@{/webjars/bootstrap/3.3.6/js/bootstrap.min.js}"></script>
-    <link rel="stylesheet" th:href="@{/webjars/bootstrap/3.3.6/css/bootstrap.min.css}"></link>
+    <link rel="stylesheet" type="text/css" th:href="@{/css/talk.css}"/>
+    <script th:src="@{/webjars/jquery/jquery.min.js}"></script>
+    <script th:src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+    <link rel="stylesheet" th:href="@{/webjars/bootstrap/css/bootstrap.min.css}"></link>
   </head>
   <body>
     <!-- ログインが失敗した時のメッセージ -->
@@ -90,7 +90,7 @@ $(function() {
                     userId:$("#new_user_id").val()
             },
             success: function(result){
-                if (result == false) {
+                if (result.result == false) {
                     $("#create_user_form").submit();
                 } else {
                     $("#err_msg").text("IDがすでに使用されています。");

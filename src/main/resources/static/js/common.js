@@ -20,12 +20,7 @@ var typeImage = new RegExp(".*\.(jpg|jpeg|png|gif|bmp|ico|tif|tiff)", "i");
 
 function fileLinkTag(imgObj) {
 
-    var srcStr = "";
-    if (typeImage.test(imgObj.saveFileName)) {
-        srcStr = "/files/" + imgObj.saveFileName;
-    } else {
-        srcStr = "/image/other_file.jpg";
-    }
+    var srcStr = convertFileNameToSrc(imgObj.saveFileName);
     var parent = $("<div></div>").addClass("chat-talk").addClass("clear-float");
     var imgTag = $("<img></img>")
             .addClass("img-responsive img-rounded")
@@ -33,16 +28,23 @@ function fileLinkTag(imgObj) {
             .attr("width", "150px")
             .attr("title", imgObj.fileName)
             .attr("name", imgObj.saveFileName);
-    var msgSenderTag = $("<div></div>").text(imgObj.userName);
+    var msgSenderTag = $("<div></div>").text(imgObj.userName).addClass("talk-name").addClass("clear-float");
     if (imgObj.userId === $("#user-id").val()) {
         parent.addClass("talk-send");
-        msgSenderTag.addClass("send-name clear-float");
+        //msgSenderTag.addClass("send-name clear-float");
     } else {
         parent.addClass("talk-receive");
-        msgSenderTag.addClass("receive-name clear-float");
+        //msgSenderTag.addClass("receive-name clear-float");
     }
     parent.append(imgTag).append(msgSenderTag);
     return parent;
+}
+
+function convertFileNameToSrc(fileName) {
+    if (typeImage.test(fileName)) {
+        return "/files/" + fileName;
+    }
+    return "/image/other_file.jpg";
 }
 
 function imageScroll() {
@@ -59,4 +61,32 @@ function msgScroll() {
     if (!!msgArea) {
         msgArea.scrollTop(msgArea[0].scrollHeight - msgArea.height());
     }
+}
+
+$(document).on("drop", "body:not(.drag-drop-area)", function(e) {
+    e.preventDefault();
+});
+
+$(document).on('dragover', "body:not(.drag-drop-area)", function(evt) {
+  evt.preventDefault();
+});
+
+function createSendTime(sendTime) {
+    if (!!!sendTime) {
+        var now = new Date();
+        return " [ " + zeroPad(now.getHours(), 2) + ":" + zeroPad(now.getMinutes(), 2) + " ]";
+    }
+    return " [ " + zeroPad(sendTime.hour, 2) + ":" + zeroPad(sendTime.minute, 2) + " ]";
+}
+
+function createSendYmd(sendTime) {
+    if (!!!sendTime) {
+        var now = new Date();
+        return now.getFullYear() + "/" + zeroPad(now.getMonth() + 1, 2) + "/" + zeroPad(now.getDate(), 2);
+    }
+    return sendTime.year + "/" + zeroPad(sendTime.monthValue, 2) + "/" + zeroPad(sendTime.dayOfMonth, 2);
+}
+
+function zeroPad(num, digit) {
+    return (Math.pow(10, digit) + String(num)).slice(digit * -1);
 }

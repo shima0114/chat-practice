@@ -1,6 +1,6 @@
-img.icon-img {
-    max-width: 200px;
-    max-height: 200px;
+.icon-image {
+    max-width: 180px;
+    max-height: 180px;
     width: auto;
     height: auto;
 }
@@ -13,6 +13,6 @@ img.icon-img {
     color:#92AAB0;
     text-align:left;vertical-align:middle;
     padding:10px 10px 10 10px;
-    margin-bottom:10px;
-    font-size:200%;
+    /*margin-bottom:10px;*/
+    font-size:150%;
 }

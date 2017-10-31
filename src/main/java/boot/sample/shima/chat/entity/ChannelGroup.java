@@ -9,21 +9,21 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 @Entity
-@Setter
 @Getter
-public class ChannelInvitation {
+@Setter
+public class ChannelGroup {
     @Id
     @GeneratedValue(strategy= GenerationType.AUTO)
     private String id;
 
     private String channelId;
-    private String targetId;
+    private String groupId;
 
-    public ChannelInvitation() {}
+    public ChannelGroup() {}
 
-    public ChannelInvitation(String id, String channelId, String targetId) {
+    public ChannelGroup(String id, String channelId, String groupId) {
         this.id = id;
         this.channelId = channelId;
-        this.targetId = targetId;
+        this.groupId = groupId;
     }
 }

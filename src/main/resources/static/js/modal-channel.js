@@ -15,19 +15,7 @@ function joinChannel() {
               userId: $("#user-id").val()
         },
         success: function(result){
-            // 登録済へ移動
-            var $this = $("#channel-" + channelId);
-            var $clone = $("#join-list-base").clone().removeAttr("id");
-            $clone.find("a.withdrawal-btn").attr("data-channel-id", $this.data("channel-id"))
-                            .attr("data-channel-scope", $this.data("channel-scope"));
-            $clone.find("a.open-channel").attr("data-channel-id",$this.data("channel-id"))
-                            .attr("data-channel-name",$this.data("channel-name"))
-                            .attr("id", "channel-" + $this.data("channel-id"));
-            $clone.find("label.join-channel-name").text($this.data("channel-name"));
-            $("#reg-grp div.panel-body").append($clone);
-            $clone.find("i").tooltip();
-            $clone.show();
-            $this.remove();
+            $("#channel-" + channelId).remove();
             listUpdate();
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
@@ -38,10 +26,12 @@ function joinChannel() {
 /* withdrawal Channel */
 $("#modal-withdrawal-channel").on("show.bs.modal", function (event) {
     var $target = $(event.relatedTarget);
-    $("#modal-channel-id").val($target.data("channel-id"));
-    var scope = $target.data("channel-scope");
+    var channelId = $target.parent("div.input-group").data("channel-id");
+    var $infoTag = $("#channel-info-" + channelId);
+    $("#modal-channel-id").val(channelId);
+    var scope = $infoTag.data("channel-scope");
     $("#modal-channel-scope").val(scope);
-    if (!!scope && scope !== "all") {
+    if (!!scope && scope === "user") {
       $("#modal-withdrawal-msg-invitation").show();
       $("#modal-withdrawal-msg-normal").hide();
     } else {
@@ -59,29 +49,73 @@ function withdrawalChannel() {
               userId: $("#user-id").val()
         },
         success: function(result){
-            var $this = $("#channel-" + $("#modal-channel-id").val());
-            if ($("#modal-channel-scope").val() == 'all') {
-                // 未登録へ移動
-                var $clone = $this.clone();
-                //$this.remove();
-                // クラスを変更
-                $clone.addClass("btn-xs").removeClass("open-channel").removeClass("form-control").addClass("list-group-item");
-                // modal表示を変更
-                $clone.attr("data-target", "#modal-join-channel");
-                $clone.attr("data-toggle", "modal");
-                // バッジ削除
-                $clone.find("span.badge").remove();
-                // onclick削除
-                $clone.removeAttr("onclick");
-                $("#other-grp div.list-group").append($clone);
-            }
-            $this.parent("div.input-group").remove();
+            $("#channel-" + $("#modal-channel-id").val()).parent("div.input-group").remove();
             listUpdate();
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             alert(textStatus);
         }
     });
+}
+
+/* Create Channel modal */
+$("#modal-create-channel").on("show.bs.modal", function (event) {
+    var $target = $(event.relatedTarget);
+    var $modal = $("#modal-create-channel");
+    if ($target.hasClass("conf-link")) {
+        // configure channel
+        $modal.find(".modal-title").text("チャンネル編集");
+        $modal.find("#create-channel-btn").text("更新");
+        var channelId = $target.parent("div.input-group").data("channel-id");
+        $("#create-channel-id").val(channelId);
+        var infoTag = $("#channel-info-" + channelId);
+        $modal.find("#make-channel-name").val(infoTag.data("channel-name"));
+        toggleScopeTarget(infoTag.data("channel-scope"));
+        if (infoTag.data("channel-scope") !== "all") {
+            getChannelInfo($modal, channelId);
+        }
+    } else {
+        $modal.find(".modal-title").text("チャンネル作成");
+        $modal.find("#create-channel-btn").text("作成");
+        $modal.find("#make-channel-name").val("");
+        $modal.find("input[name=scope_target]").prop("checked", false);
+        toggleScopeTarget("all");
+    }
+});
+
+function toggleScopeTarget(scope) {
+    if (!$("#set-" + scope).hasClass("in")) {
+        $("#modal-create-channel .scope-group").removeClass("active").addClass("collapsed");
+        $("#modal-create-channel .scope-group[href='#set-" + scope + "']").removeClass("collapsed").addClass("active");
+        $("#open-set-" + scope).trigger("click");
+    }
+}
+
+function getChannelInfo($modal, channelId) {
+    var df = $.Deferred();
+    // チャンネル情報を取得
+    $.ajax({
+        type: "GET",
+        url: '/channel/scopeTarget',
+        data: {
+          channelId: channelId
+        },
+        success: function(result){
+            //var joiners = result.joiners;
+            $.each(result, function(i, e) {
+                var $target = $modal.find("input[name=scope_target][value=" + e.targetId + "]");
+                $target.prop("checked", true);
+                if (e.disabled === "true") {
+                    $target.prop("disabled", true);
+                }
+            });
+            df.resolve();
+        },
+        error: function(XMLHttpRequest, textStatus, errorThrown){
+            df.resolve();
+        }
+    });
+    return df.promise();
 }
 
 /* Create new Channel */
@@ -95,7 +129,7 @@ function createChannel() {
         scopeTarget = scopeTarget + sep + $(target).val();
         sep = ",";
     });
-    if (valCheck()) {
+    if (valCheckChannel()) {
         $.ajax({
             type: "GET",
             url: '/channel/make',
@@ -103,11 +137,12 @@ function createChannel() {
                     channelName:$("#make-channel-name").val(),
                     userId:$("#user-id").val(),
                     channelScope: channelScope,
-                    scopeTarget: scopeTarget
+                    scopeTarget: scopeTarget,
+                    channelId:$("#create-channel-id").val()
             },
             success: function(result){
                 if (result["result"] === "success") {
-                    //listUpdate();
+                    listUpdate();
                 } else {
                     $("#create-err-msg").text("同名のチャンネルがすでに存在するため、別の名前を入力してください。");
                     $("#make-channel-name").val("");
@@ -119,7 +154,7 @@ function createChannel() {
     }
 }
 
-function valCheck() {
+function valCheckChannel() {
     if (!!!$("#make-channel-name").val()) {
         alert("チャンネル名を入力してください。");
         return false;

@@ -3,103 +3,225 @@
     <link rel="stylesheet" th:href="@{/css/config.css}"></link>
     <!-- Main area -->
     <div class="container-fluid">
-        <div class="col-md-4 sidebar">
-            <!-- channel list area(left area) -->
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    基本情報
-                </div>
-                <div class="panel-body">
-                    <form th:action="@{/user/update/common}" id="user_upd_form" method="POST">
-                        <div class="form-group">
-                            <span class="control-label">ユーザーID</span>
-                            <input type="text" class="form-control" name="upd_user_id"
-                                   required="required" aria-required="true"
-                                   disabled="disabled" th:value="${userInfo.userId()}"></input>
-                            <div class="help-block">
-                                <div>ユーザーIDは変更出来ません</div>
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <span class="control-label">ユーザー名</span>
-                            <input type="text" class="form-control" name="upd_user_name"
-                                   required="required" aria-required="true"
-                                   th:value="${userInfo.userName()}"></input>
-                        </div>
-                        <div class="form-group">
-                            <span class="control-label">パスワード</span>
-                            <div class="input-group">
-                                <input type="password" class="form-control" name="org_password"
-                                       required="required" aria-required="true" ></input>
-                                <label class="input-group-addon">パスワード変更</label>
-                                <div class="input-group-btn btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" onclick="tglBtn(this);">
-                                        <input type="button" class="btn btn-default" value="ON" id="tgl-on"></input>
-                                        <input type="button" class="btn btn-primary active" value="OFF"></input>
+        <div class="row">
+            <div class="col-md-3 sidebar">
+                <!-- user information area -->
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        基本情報
+                    </div>
+                    <div class="panel-body">
+                        <form th:action="@{/user/update/common}" id="user_upd_form" method="POST">
+                            <div class="form-group">
+                                <span class="control-label">ユーザーID</span>
+                                <input type="text" class="form-control" name="upd_user_id"
+                                       required="required" aria-required="true"
+                                       disabled="disabled" th:value="${userInfo.userId()}"></input>
+                                <div class="help-block">
+                                    <div>ユーザーIDは変更出来ません</div>
                                 </div>
                             </div>
-                        </div>
-                        <div id="chg-pwd-input" class="collapse">
                             <div class="form-group">
-                                <span class="control-label">新パスワード</span>
-                                <input type="password" class="form-control" name="new_password"
-                                       disabled="disabled" id="new_password"></input>
+                                <span class="control-label">ユーザー名</span>
+                                <input type="text" class="form-control" name="upd_user_name"
+                                       required="required" aria-required="true"
+                                       th:value="${userInfo.userName()}"></input>
                             </div>
                             <div class="form-group">
-                                <span class="control-label">新パスワード（確認）</span>
-                                <input type="password" class="form-control" name="new_password_c"
-                                       disabled="disabled" id="new_password_c"></input>
+                                <span class="control-label">パスワード</span>
+                                <div class="input-group">
+                                    <input type="password" class="form-control" name="org_password"
+                                           required="required" aria-required="true" ></input>
+                                    <label class="input-group-addon">変更</label>
+                                    <div class="input-group-btn btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" onclick="tglBtn(this);">
+                                        <input type="button" class="btn btn-default" value="する" id="tgl-on"></input>
+                                        <input type="button" class="btn btn-primary active" value="しない"></input>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="help-block">
-                                <div>新パスワード、新パスワード（確認）は変更する場合必須。</div>
+                            <div id="chg-pwd-input" class="collapse">
+                                <div class="form-group">
+                                    <span class="control-label">新パスワード</span>
+                                    <input type="password" class="form-control" name="new_password"
+                                           disabled="disabled" id="new_password"></input>
+                                </div>
+                                <div class="form-group">
+                                    <span class="control-label">新パスワード（確認）</span>
+                                    <input type="password" class="form-control" name="new_password_c"
+                                           disabled="disabled" id="new_password_c"></input>
+                                </div>
+                                <div class="help-block">
+                                    <div>新パスワード、新パスワード（確認）は変更する場合必須。</div>
+                                </div>
                             </div>
-                        </div>
-                        <div class="form-group">
-                            <input value="変更" type="button" class="btn btn-default btn-group" onclick="userUpdate();return false;"></input>
-                            <!--<input type="button" class="btn btn-group btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" aria-pressed="false"  value="パスワード変更"></input>-->
-                            <div class="help-block">
-                                <div>※変更時パスワードは必須。</div>
+                            <div class="form-group">
+                                <input value="変更" type="button" class="btn btn-default btn-group" onclick="userUpdate();return false;"></input>
+                                <!--<input type="button" class="btn btn-group btn-toggle" data-toggle="collapse" data-target="#chg-pwd-input" aria-pressed="false"  value="パスワード変更"></input>-->
+                                <div class="help-block">
+                                    <div>※変更時パスワードは必須。</div>
+                                </div>
                             </div>
-                        </div>
-                        <input type="hidden" name="user_id" th:value="${userInfo.userId()}"></input>
-                    </form>
+                            <input type="hidden" name="user_id" th:value="${userInfo.userId()}"></input>
+                        </form>
+                    </div>
                 </div>
             </div>
-        </div>
-        <!-- /channel list area(left area) -->
-        <!-- message area -->
-        <div class="col-md-3">
-            <div class="panel panel-default">
-                <div class="panel-heading">
-                    <div id="status-msg">画像アイコン</div>
+            <!-- /user information area -->
+            <!-- user image area -->
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div>画像アイコン</div>
+                    </div>
+                    <div class="panel-body">
+                        <label>設定中の画像</label>
+                        <img class="icon-image" id="current-image" th:src="${userInfo.userImageBase64()}"></img>
+                    </div>
+                    <div class="panel-body">
+                        <form id="image-upload-form" th:action="@{/user/update/image}" method="POST">
+                            <label class="upload-target">更新する画像</label>
+                            <img class="upload-target icon-image" id="upload-img"></img>
+                            <input type="hidden" id="image-src" name="imageSrc"></input>
+                            <div class="dg-area drag-drop-area">
+                                <label>更新する画像をドラッグアンドドロップして下さい</label>
+                            </div>
+                            <input class="upload-target" type="button" value="更新" id="do-upload" onclick="userImageUpload();" style="display:none;"></input>
+                        </form>
+                    </div>
+                    <!--<div class="panel-footer">
+                        footer
+                    </div>-->
                 </div>
-                <div class="panel-body">
-                    <label>設定中の画像</label>
-                    <img class="icon-image" id="current-image" th:src="${userInfo.userImageBase64()}" width="200px"></img>
-                </div>
-                <div class="panel-body">
-                    <form id="image-upload-form" th:action="@{/user/update/image}" method="POST">
-                        <label class="upload-target">更新する画像</label>
-                        <img class="upload-target icon-image" id="upload-img"></img>
-                        <input type="hidden" id="image-src" name="imageSrc"></input>
-                        <div class="dg-area">
-                            <label>更新する画像をドラッグアンドドロップして下さい</label>
-                        </div>
-                        <input class="upload-target" type="button" value="更新" id="do-upload" onclick="userImageUpload();" style="display:none;"></input>
-                    </form>
-                </div>
-                <!--<div class="panel-footer">
-                    footer
-                </div>-->
             </div>
+            <!-- /user image area -->
+            <!-- right list area -->
+            <div class="col-md-3">
+                <div class="panel panel-default">
+                    <div class="panel-heading">
+                        <div>グループ</div>
+                    </div>
+                    <div class="panel-body">
+                        <label>グループ一覧</label>
+                        <ul class="list-group">
+                            <li class="list-group-item">
+                                <a data-toggle="collapse" href="#reg-group" class="list-group-menu">
+                                    <span class="glyphicon glyphicon-minus"></span>参加中
+                                </a>
+                                <div id="reg-group" class="panel-collapse collapse in">
+                                    <div class="panel-body">
+                                        <div class="list-group">
+                                            <!--/*/ <th:block th:if="${#lists.isEmpty(groupList)}"> /*/-->
+                                            <label class="none-group-tag">登録済のグループはありません。</label>
+                                            <!--/*/ </th:block> /*/-->
+                                            <!--/*/ <th:block th:each="regGroup : ${groupList}"> /*/-->
+                                            <div class="input-group" th:attr="data-group-id=${regGroup.id}" th:id="|group-${regGroup.id}|">
+                                                <div class="list-group-item" th:text="${regGroup.groupName}"></div>
+                                                <!--/*/ <th:block th:if="${regGroup.createUserId == userInfo.userId()}"> /*/-->
+                                                <a href="#" class="withdrawal-btn btn btn-default input-group-addon conf-link" aria-hidden="true"
+                                                   data-toggle="modal" data-target="#modal-create-group">
+                                                    <i class="fa fa-cog" data-toggle="tooltip" title="設定" data-placement="left"></i>
+                                                </a>
+                                                <!--/*/ </th:block> /*/-->
+                                                <a href="#" class="withdrawal-btn btn btn-default input-group-addon" aria-hidden="true"
+                                                   data-toggle="modal" data-target="#modal-withdrawal-group">
+                                                    <i class="glyphicon glyphicon-remove-circle" data-toggle="tooltip" title="登録解除" data-placement="left"></i>
+                                                </a>
+                                                <div th:id="|group-info-${regGroup.id}|"
+                                                     th:attr="data-group-scope=${regGroup.scope},data-group-name=${regGroup.groupName},data-group-need-auth=${regGroup.needAuthorized()}"></div>
+                                            </div>
+                                            <!--/*/ </th:block> /*/-->
+                                            <div class="input-group" id="group-join-list-base" style="display:none">
+                                                <div class="list-group-item joining-group-name"></div>
+                                                <a href="#" class="withdrawal-btn btn btn-default input-group-addon conf-link" aria-hidden="true"
+                                                   data-toggle="modal" data-target="#modal-create-group"
+                                                   data-group-id="" data-group-scope="">
+                                                    <i class="fa fa-cog" data-toggle="tooltip" title="設定" data-placement="left"></i>
+                                                </a>
+                                                <a href="#" class="withdrawal-btn btn btn-default input-group-addon" aria-hidden="true"
+                                                   data-toggle="modal" data-target="#modal-withdrawal-group" data-group-id="">
+                                                    <i class="glyphicon glyphicon-remove-circle" data-toggle="tooltip" title="登録解除" data-placement="left"></i>
+                                                </a>
+                                                <div id="group-info-base"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="collapse" href="#inv-group" class="list-group-menu">
+                                    <span class="glyphicon glyphicon-plus"></span>参加待ち
+                                </a>
+                                <div id="inv-group" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="list-group">
+                                            <!--/*/ <th:block th:if="${#lists.isEmpty(groupInvitationList)}"> /*/-->
+                                            <label class="none-group-tag">参加待ちのグループはありません。</label>
+                                            <!--/*/ </th:block> /*/-->
+                                            <!--/*/ <th:block th:each="invGroup : ${groupInvitationList}"> /*/-->
+                                            <a href="#" class="btn btn-xs btn-default list-group-item" th:id="|group-${invGroup.id}|"
+                                               th:attr="data-group-id=${invGroup.id},data-group-name=${invGroup.groupName},data-group-scope=${invGroup.scope}"
+                                               data-toggle="modal" data-target="#modal-join-group">
+                                                <label th:text="${invGroup.groupName}"></label>
+                                            </a>
+                                            <!--/*/ </th:block> /*/-->
+                                            <div id="group-invitation-base" style="display:none">
+                                                <a href="#" class="btn btn-xs btn-default list-group-item"
+                                                   data-group-id="" data-group-name="" data-group-scope=""
+                                                   data-toggle="modal" data-target="#modal-join-group">
+                                                    <label>group-invitation-base</label>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item">
+                                <a data-toggle="collapse" href="#other-group" class="list-group-menu">
+                                    <span class="glyphicon glyphicon-plus"></span>未参加
+                                </a>
+                                <div id="other-group" class="panel-collapse collapse">
+                                    <div class="panel-body">
+                                        <div class="list-group">
+                                            <!--/*/ <th:block th:if="${#lists.isEmpty(groupAbstentionList)}"> /*/-->
+                                            <label class="none-group-tag">参加可能なグループはありません。</label>
+                                            <!--/*/ </th:block> /*/-->
+                                            <!--/*/ <th:block th:each="otherGroup : ${groupAbstentionList}"> /*/-->
+                                            <a href="#" class="btn btn-xs btn-default list-group-item" th:id="|group-${otherGroup.id}|"
+                                               th:attr="data-group-id=${otherGroup.id},data-group-name=${otherGroup.groupName},data-group-scope=${otherGroup.scope}"
+                                               data-toggle="modal" data-target="#modal-join-group">
+                                                <label th:text="${otherGroup.groupName}"></label>
+                                            </a>
+                                            <!--/*/ </th:block> /*/-->
+                                            <div id="group-abstention-base" style="display:none">
+                                                <a href="#" class="btn btn-xs btn-default list-group-item"
+                                                   data-group-id="" data-group-name="" data-group-scope=""
+                                                   data-toggle="modal" data-target="#modal-join-group">
+                                                    <label>group-abstention-base</label>
+                                                </a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                    <!--<div class="panel-footer">
+                        footer
+                    </div>-->
+                </div>
+            </div>
+            <!-- /right list area -->
         </div>
-
-        <!-- /message area -->
-        <!-- right list area -->
-        <div class="col-md-2">
-        </div>
-        <!-- /right list area -->
     </div>
     <!-- /Main area -->
     <script th:src="@{/js/config.js}"></script>
+    <!-- modal area -->
+    <input type="hidden" id="modal-group-id"></input>
+    <input type="hidden" id="modal-group-scope"></input>
+    <!-- modal join group -->
+    <div th:include="modal/group::join"></div>
+    <!-- modal withdrawal group -->
+    <div th:include="modal/group::withdrawal"></div>
+    <!-- /modal area -->
 </div>
 </html>

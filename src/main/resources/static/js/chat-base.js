@@ -25,9 +25,10 @@ var openChannel = function ($this) {
         return false;
     }
     conClose();
-    $("#channel-id").val($this.data("channel-id"));
+    var $channelInfo = $("#channel-info-" + $this.parent("div.input-group").data("channel-id"));
+    $("#channel-id").val($this.parent("div.input-group").data("channel-id"));
     connect();
-    var channelName = $this.data("channel-name");
+    var channelName = $channelInfo.data("channel-name");
     $("#status-msg").html(channelName + "に接続中");
     $this.addClass("active");
     $this.find("span.badge").text("0");
@@ -96,6 +97,7 @@ function restoreChannel() {
 /* message history load */
 function loadHistory() {
     var df = $.Deferred();
+    var hrTag = $("<hr />");
     $.ajax({
         type: "GET",
         url: '/history/load',
@@ -104,30 +106,32 @@ function loadHistory() {
         },
         success: function(result){
             var msgArea = $("#messages");
-            var imageArray = result.user_images;
+            var senders = result.senders;
             var histories = result.history;
+            var prevDay = "";
             $.each(histories, function(i, history) {
+                var sender = senders[history.userId];
                 var type = history.type;
+                var sendTime = createSendTime(history.sendTime);
+                if (prevDay !== history.sendTime.dayOfMonth) {
+                    var sepTag = $("<div></div>").addClass("lines-on-sides")
+                                        .addClass("clear-float").text(createSendYmd(history.sendTime));
+                    msgArea.append(sepTag);
+                    prevDay = history.sendTime.dayOfMonth;
+                }
                 if (type == "message") {
-                    msgArea.append(messageTag(history.message, history.userName, history.userId, imageArray[history.userId]));
+                    msgArea.append(messageTag(history.message, sender.name + sendTime, history.userId, sender.image));
                 } else if (type == "file-link") {
                     var imgObj = {};
                     imgObj.saveFileName = history.message;
                     imgObj.fileName = history.message.substr(15);
-                    imgObj.userName = history.userName;
+                    imgObj.userName = sender.name + sendTime;
                     imgObj.userId = history.userId;
                     msgArea.append(fileLinkTag(imgObj));
                 }
             });
-            /*var $lastImg = msgArea.find("img").last();
-            if (!!$lastImg) {
-                $lastImg.on("load", function() {
-                    df.resolve();
-                })
-            }*/
             imageScroll();
             df.resolve();
-            //msgScroll();
         },
         error: function(XMLHttpRequest, textStatus, errorThrown){
             df.resolve();
@@ -148,14 +152,23 @@ function loadChannelInfo() {
         success: function(result){
             var joiners = result.joiners;
             $.each(joiners, function(i, e) {
-                var joinersTag = $("<div></div>").text(e.name);
-                $("#joiners-tab").append(joinersTag);
+                var trTag = $("<tr></tr>");
+                var userImage = $("<img></img>").attr("src", e.image);
+                var imageTag = $("<td></td>").append(userImage).addClass("icon-circle");
+                var nameTag = $("<td></td>").text(e.name);
+                var loginTag = $("<td></td>").text(e.lastLogin);
+                $("#user-table-body").append(trTag.append(imageTag).append(nameTag).append(loginTag));
             });
             var attachments = result.attachments;
             $.each(attachments, function(i, e) {
-                var divTag = $("<div></div>");
-                var fileTag = $("<a></a>").attr("href", "/file/download/" + e.id).text(e.originalFileName).attr("download", e.originalFileName);
-                $("#attached-tab").append(divTag.append(fileTag));
+                var divTag = $("<div></div>").addClass("col-md-4");
+                var fileTag = $("<a></a>").attr("href", "/file/download/" + e.id)
+                                    .attr("title", e.originalFileName)
+                                    .attr("download", e.originalFileName)
+                                    .addClass("thumbnail");
+                var imgSrc = convertFileNameToSrc(e.saveFileName);
+                var thumbTag = $("<img></img>").attr("src", imgSrc);
+                $("#attached-tab div.row").append(divTag.append(fileTag.append(thumbTag)));
             });
             df.resolve();
         },
@@ -170,9 +183,10 @@ function loadChannelInfo() {
 var timerId = null;
 var lastInterval = "0";
 var listUpdate = function() {
+    $(".none-tag").remove();
     $.ajax({
         type: "GET",
-        url: '/channel/listupdate',
+        url: '/channel/listUpdate',
         data: {userId:$("#user-id").val()},
         success: function(result){
             var joiningList = result.joiningList;
@@ -181,15 +195,45 @@ var listUpdate = function() {
             // 参加済リスト更新
             joiningList.forEach(function(channels){
                 var channel = channels.channel;
-                var channelTag = $("#channel-" + channel.id);
+                var channelTag = $("#reg-channel").find("#channel-" + channel.id);
                 if (!!channelTag.length) {
                     channelTag.find("span.badge").text(channels.unread);
+                } else {
+                    var $clone = $("#join-list-base").clone().removeAttr("id");
+                    $clone.attr("data-channel-id", channel.id);
+                    var scope = channel.channelScope;
+                    //$clone.find("a.withdrawal-btn").attr("data-channel-scope", scope);
+                    $clone.find("span.badge").text(channels.unread);
+                    $clone.find("a.open-channel")
+                    //.attr("data-channel-name",channel.channelName)
+                                    .attr("id", "channel-" + channel.id);
+                    if (scope == "all") {
+                        $clone.find("a.open-channel").addClass("fa fa-users");
+                    } else if (scope == "user") {
+                        $clone.find("a.open-channel").addClass("fa fa-user-secret");
+                    } else if (scope == "group") {
+                        $clone.find("a.open-channel").addClass("fa fa-user-plus");
+                    }
+                    $clone.find("label.join-channel-name").text(channel.channelName);
+                    $("#reg-channel div.panel-body").append($clone);
+                    if (channel.createUserId !== $("#user-id").val()) {
+                        $clone.find(".conf-link").remove();
+                    }
+                    $clone.find("i").tooltip();
+                    $clone.find("#channel-info-base").attr("id", "channel-info-" + channel.id)
+                        .attr("data-channel-scope", scope)
+                        .attr("data-channel-name", channel.channelName);
+                    $clone.show();
                 }
             });
+            if (!!!$("#reg-channel div.input-group:not(#join-list-base)").length) {
+                var noneTag = $("<label></label>").addClass("none-tag").text("登録済のチャンネルがありません。");
+                $("#reg-channel div.panel-body").prepend(noneTag);
+            }
             // 招待済リスト更新
             invitationList.forEach(function(channels){
                 var channel = channels.channel;
-                var channelTag = $("#inv-grp").find("#channel-" + channel.id);
+                var channelTag = $("#inv-channel").find("#channel-" + channel.id);
                 if (!!!channelTag.length) {
                     var addTag = $("#invitation-base a").clone();
                     addTag.attr("id", "channel-" + channel.id)
@@ -197,17 +241,21 @@ var listUpdate = function() {
                         .attr("data-channel-name", channel.channelName)
                         .attr("data-channel-scope", channel.channelScope);
                     addTag.find("label").text(channel.channelName);
-                    $("#inv-grp div.list-group").append(addTag);
+                    if (!!!$("#reg-channel a#channel-" + channel.id).length) {
+                        $("#inv-channel div.list-group").append(addTag);
+                    }
+                    //$("#inv-channel div.list-group").append(addTag);
                 }
             });
-            if (!!!$("#inv-grp div.list-group a:not(#invitation-base > a) a").length) {
-                // TODO 登録無し表示
+            if (!!!$("#inv-channel div.list-group a:not(#invitation-base > a)").length) {
+                var noneTag = $("<label></label>").addClass("none-tag").text("招待されたチャンネルがありません。");
+                $("#inv-channel div.list-group").prepend(noneTag);
             }
 
             // 未参加リスト更新
             abstentionList.forEach(function(channels){
                 var channel = channels.channel;
-                var channelTag = $("#other-grp").find("#channel-" + channel.id);
+                var channelTag = $("#other-channel").find("#channel-" + channel.id);
                 if (!!!channelTag.length) {
                     var addTag = $("#abstention-base a").clone();
                     addTag.attr("id", "channel-" + channel.id)
@@ -215,11 +263,12 @@ var listUpdate = function() {
                         .attr("data-channel-name", channel.channelName)
                         .attr("data-channel-scope", channel.channelScope);
                     addTag.find("label").text(channel.channelName);
-                    $("#other-grp div.list-group").append(addTag);
+                    $("#other-channel div.list-group").append(addTag);
                 }
             });
-            if (!!!$("#other-grp div.list-group a:not(#abstention-base > a)").length) {
-                // TODO 登録無し表示
+            if (!!!$("#other-channel div.list-group a:not(#abstention-base > a)").length) {
+                var noneTag = $("<label></label>").addClass("none-tag").text("登録可能なチャンネルがありません。");
+                $("#other-channel div.list-group").prepend(noneTag);
             }
 
         },

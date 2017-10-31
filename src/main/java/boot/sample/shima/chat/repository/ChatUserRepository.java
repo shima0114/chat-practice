@@ -8,8 +8,8 @@ import java.util.List;
 
 @Repository
 public interface ChatUserRepository extends JpaRepository<ChatUser, String> {
-    public ChatUser findByUserName(String username);
-    public ChatUser findByUserId(String userId);
-    public List<ChatUser> findAllByUserIdNot(String userId);
-    public ChatUser findByUserIdAndPassword(String userId, String password);
+    ChatUser findByUserName(String username);
+    ChatUser findByUserId(String userId);
+    List<ChatUser> findAllByUserIdNot(String userId);
+    ChatUser findByUserIdAndPassword(String userId, String password);
 }

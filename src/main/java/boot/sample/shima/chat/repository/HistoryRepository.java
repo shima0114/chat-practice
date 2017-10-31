@@ -13,20 +13,20 @@ import org.springframework.transaction.annotation.Transactional;
 
 @Repository
 public interface HistoryRepository  extends JpaRepository<History, String> {
-    public List<History> findByChannelIdOrderBySendTimeDescIdAsc(String channelId);
+    List<History> findByChannelIdOrderBySendTimeDescIdAsc(String channelId);
 
     @Query("select h from History h where channelId = :channelId order by sendTime ASC ")
-    public List<History> findLatestHistory(@Param("channelId") String channelId);
+    List<History> findLatestHistory(@Param("channelId") String channelId);
 
     @Transactional
     @Modifying
     @Query("delete from History h where h.channelId = :channelId")
-    public int deleteClosedChannelHistoryBefore3Days(@Param("channelId") String channelId);
+    int deleteClosedChannelHistoryBefore3Days(@Param("channelId") String channelId);
 
-    public int countIntByChannelIdAndSendTimeAfter(String channelId, LocalDateTime dateTime);
+    int countIntByChannelIdAndSendTimeAfter(String channelId, LocalDateTime dateTime);
 
-    public int countIntByChannelId(String channelId);
+    int countIntByChannelId(String channelId);
 
     @Query("select h.userId from History h where h.channelId = :channelId group by h.userId")
-    public List<String> getSendingUserIds(@Param("channelId") String channelId);
+    List<String> getSendingUserIds(@Param("channelId") String channelId);
 }

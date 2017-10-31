@@ -9,12 +9,12 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface ChannelStateRepository extends JpaRepository<ChannelState, ChannelStateKey> {
-    public ChannelState findByChannelIdAndEntryUserId(String channelId, String userId);
+    ChannelState findByChannelIdAndEntryUserId(String channelId, String userId);
 
-    public List<ChannelState> findAllByChannelId(String channelId);
+    List<ChannelState> findAllByChannelId(String channelId);
 
-    public int countByChannelId(String channelId);
+    int countByChannelId(String channelId);
 
-    public List<ChannelState> findAllByEntryUserIdOrderByJoiningDateTime(String entryUserId);
+    List<ChannelState> findAllByEntryUserIdOrderByJoiningDateTime(String entryUserId);
 
 }
