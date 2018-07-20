@@ -244,7 +244,7 @@ public class ChannelService {
     public void joinChannel(String channelId, String userId) {
         ChannelState state = stateRepo.findByChannelIdAndEntryUserId(channelId, userId);
         if (state == null) {
-            state = new ChannelState(userId, channelId);
+            state = new ChannelState(userId, channelId, LocalDateTime.now(), LocalDateTime.now());
         }
         stateRepo.save(state);
         invitationRepo.deleteByChannelIdAndTargetId(channelId, userId);

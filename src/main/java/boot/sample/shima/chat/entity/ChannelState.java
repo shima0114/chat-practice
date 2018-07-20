@@ -30,11 +30,18 @@ public class ChannelState {
 
     public ChannelState() {}
 
-    public ChannelState(String entryUserId, String channelId) {
+//    public ChannelState(String entryUserId, String channelId) {
+//        this.entryUserId = entryUserId;
+//        this.channelId = channelId;
+//        this.joiningDateTime = LocalDateTime.now();
+////        this.lastLogin =LocalDateTime.now();
+//    }
+
+    public ChannelState(String entryUserId, String channelId, LocalDateTime joiningDateTime, LocalDateTime lastLogin) {
         this.entryUserId = entryUserId;
         this.channelId = channelId;
-        this.joiningDateTime = LocalDateTime.now();
-//        this.lastLogin =LocalDateTime.now();
+        this.joiningDateTime = joiningDateTime;
+        this.lastLogin = lastLogin;
     }
 
     public LocalDateTime lastLogin() {

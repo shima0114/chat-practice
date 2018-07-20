@@ -56,23 +56,24 @@ public class ChannelHandler extends TextWebSocketHandler {
         @SuppressWarnings("unchecked")
         Map<String, String> msgMap = mapper.readValue(message.getPayload(), HashMap.class);
         String type = msgMap.get("type");
-        if ("system-message".equals(type) || "force-close".equals(type)) {
-            return;
+        String userId = msgMap.get("user_id");
+
+        if (!"system-message".equals(type) && !"force-close".equals(type)) {
+            // messageの中身をヒストリーに追加
+            String userName = msgMap.get("user_name");
+            String messageText = msgMap.get("message");
+            historyService.resistMessageHistory(channelId, userId, userName, messageText, type);
+            // 送信メッセージにユーザー画像を追加
+            ChatUser user = userService.loadUserByUserId(userId);
+            msgMap.put("user_image", user.userImageBase64());
+            // メッセージ送信時に最終ログイン日時を更新
+            channelService.lastLogin(channelId, userId);
         }
 
-        String userId = msgMap.get("user_id");
-        ChatUser user = userService.loadUserByUserId(userId);
-        msgMap.put("user_image", user.userImageBase64());
         TextMessage msg = new TextMessage(mapper.writeValueAsBytes(msgMap));
         for (WebSocketSession channelSession : channelSessionPool.get(channelId)) {
             channelSession.sendMessage(msg);
         }
-        // messageの中身をヒストリーに追加
-        String userName = msgMap.get("user_name");
-        String messageText = msgMap.get("message");
-        historyService.resistMessageHistory(channelId, userId, userName, messageText, type);
-        // メッセージ送信時に最終ログイン日時を更新
-        channelService.lastLogin(channelId, userId);
     }
 
     @Override

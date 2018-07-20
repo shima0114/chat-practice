@@ -47,12 +47,12 @@ public class AttachmentFileService {
             String saveFileName = saveTime + file.getOriginalFilename();
 
             // アップロードファイルを格納するディレクトリを作成する
-            File uploadFile = new File(upDir, saveFileName);
+            //File uploadFile = new File(upDir, saveFileName);
             // アップロードファイルを置く
-            File createFile =
-                    new File(uploadFile.getPath());
+            //File createFile =
+            //        new File(uploadFile.getPath()); // TODO これ要る？
             try (BufferedOutputStream uploadFileStream =
-                         new BufferedOutputStream(new FileOutputStream(createFile))) {
+                         new BufferedOutputStream(new FileOutputStream(new File(upDir, saveFileName)))) {
                 byte[] bytes = file.getBytes();
                 uploadFileStream.write(bytes);
             } catch (Exception e) {

@@ -19,7 +19,7 @@
         webSocket.onmessage = function(data) {
             var retMsg = JSON.parse(data.data);
             if (retMsg.user_id =="system") {
-                var msgBodyTag = $("<div></div>").text(retMsg.message).addClass("clear-float");
+                var msgBodyTag = $("<div></div>").text(retMsg.message).addClass("clear-float lines-on-sides");
                 $("#messages").append(msgBodyTag);
                 if (retMsg.type == "force-close") {
                     var closeWait = 5;
